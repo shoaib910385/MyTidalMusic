@@ -64,5 +64,5 @@ unidecode
 wget
 youtube-search
 youtube-search-python
-git+https://github.com/pyrogram/pyrogram
+pyrogram==2.0.106
 git+https://github.com/yt-dlp/yt-dlp
