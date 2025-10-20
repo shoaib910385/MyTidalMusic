@@ -1,10 +1,20 @@
-FROM ubuntu:22.04
+# Use a Python 3.11 + Node.js 18 base image
+FROM nikolaik/python-nodejs:python3.11-nodejs18
 
-RUN apt-get update && apt-get install -y python3 python3-pip nodejs npm ffmpeg
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Copy project files
 COPY . /app/
+
+# Set working directory
 WORKDIR /app/
 
-RUN pip3 install --no-cache-dir -U -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -U -r requirements.txt
 
-CMD bash start
+EXPOSE 8080
+
+# Run the bot
+CMD ["bash", "start"]
