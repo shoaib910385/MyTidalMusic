@@ -60,5 +60,6 @@ unidecode
 wget
 youtube-search
 youtube-search-python
-yt-dlp>=2025.10.15
+youtube_dl==2021.12.17
+git+https://github.com/yt-dlp/yt-dlp
 git+https://github.com/AsmSafone/SafoneAPI
