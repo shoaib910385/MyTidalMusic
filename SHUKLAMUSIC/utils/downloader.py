@@ -5,6 +5,7 @@ import yt_dlp
 
 COOKIES_FILE = "SHUKLAMUSIC/assets/cookies.txt"
 DOWNLOAD_DIR = "downloads"
+YOUTUBE_API_KEY = "30DxNexGenBotsbfed26"  # <-- Your API key
 
 # Ensure download directory exists
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -17,7 +18,6 @@ YDL_AUDIO_OPTS = {
     "nocheckcertificate": True,
     "quiet": True,
     "no_warnings": True,
-    "cookiefile": COOKIES_FILE,
     "prefer_ffmpeg": True,
     "postprocessors": [
         {
@@ -26,6 +26,7 @@ YDL_AUDIO_OPTS = {
             "preferredquality": "192",
         }
     ],
+    "youtube_api_key": YOUTUBE_API_KEY,
 }
 
 # Standard yt-dlp options for video
@@ -36,9 +37,9 @@ YDL_VIDEO_OPTS = {
     "nocheckcertificate": True,
     "quiet": True,
     "no_warnings": True,
-    "cookiefile": COOKIES_FILE,
     "prefer_ffmpeg": True,
     "merge_output_format": "mp4",
+    "youtube_api_key": YOUTUBE_API_KEY,
 }
 
 
@@ -46,28 +47,37 @@ async def async_download(url: str, is_video=False, title: str = None, progress_h
     """
     Downloads audio or video from a YouTube URL asynchronously.
     Returns the local file path or None if failed.
+    Uses API key first; falls back to cookies if YouTube blocks download.
     """
     loop = asyncio.get_running_loop()
 
-    def download_sync():
+    def download_sync(opts):
         try:
-            opts = YDL_VIDEO_OPTS.copy() if is_video else YDL_AUDIO_OPTS.copy()
-            if title:
-                ext = "mp4" if is_video else "mp3"
-                opts["outtmpl"] = os.path.join(DOWNLOAD_DIR, f"{title}.{ext}")
-            if progress_hook:
-                opts["progress_hooks"] = [progress_hook]
-
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(url, download=True)
                 filename = ydl.prepare_filename(info)
-                if is_video and title:
-                    filename = os.path.join(DOWNLOAD_DIR, f"{title}.mp4")
-                elif not is_video and title:
-                    filename = os.path.join(DOWNLOAD_DIR, f"{title}.mp3")
+                ext = "mp4" if is_video else "mp3"
+                if title:
+                    filename = os.path.join(DOWNLOAD_DIR, f"{title}.{ext}")
                 return filename
         except Exception as e:
-            print(f"[Downloader Error] {e}")
-            return None
+            return str(e)
 
-    return await loop.run_in_executor(None, download_sync)
+    # Prepare options
+    opts = YDL_VIDEO_OPTS.copy() if is_video else YDL_AUDIO_OPTS.copy()
+    if title:
+        ext = "mp4" if is_video else "mp3"
+        opts["outtmpl"] = os.path.join(DOWNLOAD_DIR, f"{title}.{ext}")
+    if progress_hook:
+        opts["progress_hooks"] = [progress_hook]
+
+    # Try API key first
+    result = await loop.run_in_executor(None, download_sync, opts)
+
+    # If blocked by YouTube bot check, fallback to cookies
+    if isinstance(result, str) and "Sign in to confirm" in result:
+        opts["cookiefile"] = COOKIES_FILE
+        result = await loop.run_in_executor(None, download_sync, opts)
+
+    # Return downloaded file path or None if failed
+    return result if os.path.exists(result) else None
