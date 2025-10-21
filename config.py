@@ -22,9 +22,9 @@ MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 
 # -----------------------------
 # YouTube API configuration
-API_URL = os.getenv("API_URL", "https://www.googleapis.com/youtube/v3")
-VIDEO_API_URL = os.getenv("VIDEO_API_URL", "https://www.googleapis.com/youtube/v3")
-API_KEY = os.getenv("API_KEY", "AIzaSyDXEUiyrUFyp-e7_CRFRCzkQ2n2qqPSsHE")
+API_URL = getenv("API_URL", 'https://api.thequickearn.xyz') #youtube song url
+VIDEO_API_URL = getenv("VIDEO_API_URL", 'https://api.video.thequickearn.xyz')
+API_KEY = getenv("API_KEY", None)
 
 # Limits and IDs
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 17000))
