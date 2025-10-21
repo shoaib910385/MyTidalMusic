@@ -11,7 +11,8 @@ from youtubesearchpython.__future__ import VideosSearch
 from SHUKLAMUSIC.utils.database import is_on_off
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
 
-cookies_file = "SHUKLAMUSIC/assets/cookies.txt"
+YOUTUBE_API_KEY = "30DxNexGenBotsbfed26"  # <-- Your API key
+
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
@@ -35,7 +36,7 @@ class YouTubeAPI:
         self.listbase = "https://youtube.com/playlist?list="
         self.reg = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 
-        # Standard yt-dlp options
+        # yt-dlp options using API key
         self.YDL_OPTS_AUDIO = {
             "format": "bestaudio[acodec!=iamf.001.001.Opus]/bestaudio/best",
             "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -43,15 +44,11 @@ class YouTubeAPI:
             "nocheckcertificate": True,
             "quiet": True,
             "no_warnings": True,
-            "cookiefile": cookies_file,
             "prefer_ffmpeg": True,
             "postprocessors": [
-                {
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }
+                {"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}
             ],
+            "youtube_api_key": YOUTUBE_API_KEY,
         }
 
         self.YDL_OPTS_VIDEO = {
@@ -61,9 +58,9 @@ class YouTubeAPI:
             "nocheckcertificate": True,
             "quiet": True,
             "no_warnings": True,
-            "cookiefile": cookies_file,
             "prefer_ffmpeg": True,
             "merge_output_format": "mp4",
+            "youtube_api_key": YOUTUBE_API_KEY,
         }
 
     async def exists(self, link: str, videoid: Union[bool, str] = None):
