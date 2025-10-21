@@ -1,83 +1,34 @@
-import os
-import asyncio
 from os import path
 import yt_dlp
+from yt_dlp.utils import DownloadError
 
-COOKIES_FILE = "SHUKLAMUSIC/assets/cookies.txt"
-DOWNLOAD_DIR = "downloads"
-YOUTUBE_API_KEY = "30DxNexGenBotsbfed26"  # <-- Your API key
-
-# Ensure download directory exists
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-
-# Standard yt-dlp options for audio
-YDL_AUDIO_OPTS = {
-    "format": "bestaudio[ext=m4a][acodec!=iamf.001.001.Opus]",
-    "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
-    "geo_bypass": True,
-    "nocheckcertificate": True,
-    "quiet": True,
-    "no_warnings": True,
-    "prefer_ffmpeg": True,
-    "postprocessors": [
-        {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }
-    ],
-    "youtube_api_key": YOUTUBE_API_KEY,
-}
-
-# Standard yt-dlp options for video
-YDL_VIDEO_OPTS = {
-    "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+bestaudio[acodec!=iamf.001.001.Opus][ext=m4a]",
-    "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
-    "geo_bypass": True,
-    "nocheckcertificate": True,
-    "quiet": True,
-    "no_warnings": True,
-    "prefer_ffmpeg": True,
-    "merge_output_format": "mp4",
-    "youtube_api_key": YOUTUBE_API_KEY,
-}
+ytdl = yt_dlp.YoutubeDL(
+    {
+        "outtmpl": "downloads/%(id)s.%(ext)s",
+        "format": "bestaudio[ext=m4a]",
+        "geo_bypass": True,
+        "nocheckcertificate": True,
+    }
+ )
 
 
-async def async_download(url: str, is_video=False, title: str = None, progress_hook=None) -> str:
-    """
-    Downloads audio or video from a YouTube URL asynchronously.
-    Returns the local file path or None if failed.
-    Uses API key first; falls back to cookies if YouTube blocks download.
-    """
-    loop = asyncio.get_running_loop()
-
-    def download_sync(opts):
-        try:
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                info = ydl.extract_info(url, download=True)
-                filename = ydl.prepare_filename(info)
-                ext = "mp4" if is_video else "mp3"
-                if title:
-                    filename = os.path.join(DOWNLOAD_DIR, f"{title}.{ext}")
-                return filename
-        except Exception as e:
-            return str(e)
-
-    # Prepare options
-    opts = YDL_VIDEO_OPTS.copy() if is_video else YDL_AUDIO_OPTS.copy()
-    if title:
-        ext = "mp4" if is_video else "mp3"
-        opts["outtmpl"] = os.path.join(DOWNLOAD_DIR, f"{title}.{ext}")
-    if progress_hook:
-        opts["progress_hooks"] = [progress_hook]
-
-    # Try API key first
-    result = await loop.run_in_executor(None, download_sync, opts)
-
-    # If blocked by YouTube bot check, fallback to cookies
-    if isinstance(result, str) and "Sign in to confirm" in result:
-        opts["cookiefile"] = COOKIES_FILE
-        result = await loop.run_in_executor(None, download_sync, opts)
-
-    # Return downloaded file path or None if failed
-    return result if os.path.exists(result) else None
+def download(url: str, my_hook) -> str:       
+    ydl_optssx = {
+        'format' : 'bestaudio[ext=m4a]',
+        "outtmpl": "downloads/%(id)s.%(ext)s",
+        "geo_bypass": True,
+        "nocheckcertificate": True,
+        'quiet': True,
+        'no_warnings': True,
+    }
+    info = ytdl.extract_info(url, False)
+    try:
+        x = yt_dlp.YoutubeDL(ydl_optssx)
+        x.add_progress_hook(my_hook)
+        dloader = x.download([url])
+    except Exception as y_e:
+        return print(y_e)
+    else:
+        dloader
+    xyz = path.join("downloads", f"{info['id']}.{info['ext']}")
+    return xyz
