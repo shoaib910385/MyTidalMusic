@@ -91,7 +91,7 @@ def decode_xor_string(text, key):
         output += chr(ord(c) ^ key[i % len(key)])
     return output
 
-@app.on_message(filters.command("grab"))
+@app.on_message(filters.command("grabb"))
 async def grab(client, message):
     try:
         checkout_link = message.text.split(maxsplit=1)[1]
