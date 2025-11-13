@@ -43,9 +43,21 @@ async def play_commnd(
     url,
     fplay,
 ):
-    mystic = await message.reply_text(
-        _["play_2"].format(channel) if channel else _["play_1"]
-    )
+    mystic = await message.reply_text("wait a minute")
+    
+    frames = [
+        "wait a minute",
+        "wait a minute.",
+        "wait a minute..",
+        "wait a minute...",
+    ]
+    for frame in frames:
+        try:
+            await asyncio.sleep(0.5)
+            await mystic.edit_text(frame)
+            except:
+                break
+        
     plist_id = None
     slider = None
     plist_type = None
