@@ -51,9 +51,9 @@ async def play_commnd(
     await asyncio.sleep(0.3)
     await mystic.edit_text("<blockquote>❖ 𝖶𝖺𝗂𝗍 𝖺 𝗆𝗂𝗇𝗎𝗍𝖾....</blockquote>")
     await asyncio.sleep(0.3)
-    await mystic.edit_text("<i><blockquote>❖ 𝖳𝗋𝖺𝖼𝗄 𝖥𝗈𝗎𝗇𝖽</blockquote></i>")
+    await mystic.edit_text("<blockquote>❖ 𝖳𝗋𝖺𝖼𝗄 𝖥𝗈𝗎𝗇𝖽</blockquote>")
     await asyncio.sleep(0.2)
-    await mystic.edit_text("<i><blockquote>❖ 𝖳𝗋𝖺𝖼𝗄 𝖥𝗈𝗎𝗇𝖽</blockquote></i>\n<i><blockquote>𝖤𝗇𝗁𝖺𝗇𝖼𝗂𝗇𝗀 𝗍𝗁𝖾 𝗊𝗎𝖺𝗅𝗂𝗍𝗒 𝗂𝗇 0.5 𝖲𝖾𝖼𝗈𝗇𝖽...</blockquote></i>")
+    await mystic.edit_text("<blockquote>❖ 𝖳𝗋𝖺𝖼𝗄 𝖥𝗈𝗎𝗇𝖽</blockquote>\n<blockquote>𝖤𝗇𝗁𝖺𝗇𝖼𝗂𝗇𝗀 𝗍𝗁𝖾 𝗊𝗎𝖺𝗅𝗂𝗍𝗒 𝗂𝗇 0.5 𝖲𝖾𝖼𝗈𝗇𝖽...</blockquote>")
     
     plist_id = None
     slider = None
