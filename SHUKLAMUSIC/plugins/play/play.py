@@ -55,8 +55,9 @@ async def play_commnd(
         try:
             await asyncio.sleep(0.5)
             await mystic.edit_text(frame)
-            except:
-                break
+        
+        except:
+            break
         
     plist_id = None
     slider = None
