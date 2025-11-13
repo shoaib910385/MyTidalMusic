@@ -43,21 +43,24 @@ async def play_commnd(
     url,
     fplay,
 ):
-    mystic = await message.reply_text("wait a minute")
-    
-    frames = [
-        "wait a minute",
-        "wait a minute.",
-        "wait a minute..",
-        "wait a minute...",
-    ]
-    for frame in frames:
-        try:
-            await asyncio.sleep(0.5)
-            await mystic.edit_text(frame)
-        
-        except:
-            break
+    mystic = 
+    await message.reply_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ.</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ..</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ...</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ғɪɴᴅɪɴɢ ᴛʀᴀᴄᴋ</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ.</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ..</blockquote>")
+    await asyncio.sleep(0.15)
+    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ...</blockquote>")
         
     plist_id = None
     slider = None
