@@ -46,22 +46,15 @@ async def play_commnd(
 ):
     mystic = await message.reply_text("✨")
     
-    await asyncio.sleep(0.15)
+    await asyncio.sleep(0.1)
     await mystic.edit_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ.</blockquote>")
-    await asyncio.sleep(0.15)
+    await asyncio.sleep(0.1)
     await mystic.edit_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ..</blockquote>")
-    await asyncio.sleep(0.15)
+    await asyncio.sleep(0.1)
     await mystic.edit_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ...</blockquote>")
     await asyncio.sleep(0.15)
     await mystic.edit_text("<blockquote>ғɪɴᴅɪɴɢ ᴛʀᴀᴄᴋ</blockquote>")
-    await asyncio.sleep(0.15)
-    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ</blockquote>")
-    await asyncio.sleep(0.15)
-    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ.</blockquote>")
-    await asyncio.sleep(0.15)
-    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ..</blockquote>")
-    await asyncio.sleep(0.15)
-    await mystic.edit_text("<blockquote>ᴇɴʜᴀɴᴄɪɴɢ ǫᴜᴀʟɪᴛʏ...</blockquote>")
+
         
     plist_id = None
     slider = None
