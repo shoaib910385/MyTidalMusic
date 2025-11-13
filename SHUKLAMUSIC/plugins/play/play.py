@@ -47,9 +47,9 @@ async def play_commnd(
     mystic = await message.reply_text("✨")
     
     await asyncio.sleep(0.2)
-    await mystic.edit_text("<blockquote>❖ 𝖥𝗂𝗇𝖽𝗂𝗇𝗀 𝖳𝗋𝖺𝖼𝗄...</blockquote>")
+    await mystic.edit_text("<blockquote>❖ 𝖥𝗂𝗇𝖽𝗂𝗇𝗀 𝖳𝗋𝖺𝖼𝗄..</blockquote>")
     await asyncio.sleep(0.3)
-    await mystic.edit_text("<blockquote>❖ 𝖶𝖺𝗂𝗍 𝖺 𝗆𝗂𝗇𝗎𝗍𝖾....</blockquote>")
+    await mystic.edit_text("<blockquote>❖ 𝖥𝗂𝗇𝖽𝗂𝗇𝗀 𝖳𝗋𝖺𝖼𝗄....</blockquote>\n<blockquote>❖ 𝖶𝖺𝗂𝗍 𝖺 𝗆𝗂𝗇𝗎𝗍𝖾...</blockquote>")
     await asyncio.sleep(0.3)
     await mystic.edit_text("<blockquote>❖ 𝖳𝗋𝖺𝖼𝗄 𝖥𝗈𝗎𝗇𝖽</blockquote>")
     await asyncio.sleep(0.2)
