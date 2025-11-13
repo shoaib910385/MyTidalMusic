@@ -43,8 +43,8 @@ async def play_commnd(
     url,
     fplay,
 ):
-    mystic = 
-    await message.reply_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ</blockquote>")
+    mystic = await message.reply_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ</blockquote>")
+    
     await asyncio.sleep(0.15)
     await mystic.edit_text("<blockquote>ᴡᴀɪᴛ ᴀ ᴍɪɴᴜᴛᴇ.</blockquote>")
     await asyncio.sleep(0.15)
