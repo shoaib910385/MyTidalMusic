@@ -44,15 +44,13 @@ async def play_commnd(
     url,
     fplay,
 ):
-    mystic = await message.reply_text("❖ 𝖳𝗋𝖺𝖼𝗄 𝖥𝗈𝗎𝗇𝖽 ✨")
+    mystic = await message.reply_text("<blockquote>🥂 ʟσᴧᴅιηɢ ■□□□□□</blockquote>")
 
-    await asyncio.sleep(0.1)
-    await mystic.edit_text("<blockquote>🥂 ʟσᴧᴅιηɢ ■□□□□□</blockquote>")
-    await asyncio.sleep(0.2)
-    await mystic.edit_text("<blockquote>🥂 ʟσᴧᴅιηɢ ■■■□□□</blockquote>")
-    await asyncio.sleep(0.1)
-    await mystic.edit_text("<blockquote>🥂 ʟσᴧᴅιηɢ ■■■■■□</blockquote>")
-    await asyncio.sleep(0.1)
+    await asyncio.sleep(0.3)
+    await mystic.edit_text("<blockquote>🥂 ʟσᴧᴅιηɢ ■■□□□□</blockquote>")
+    await asyncio.sleep(0.3)
+    await mystic.edit_text("<blockquote>🥂 ʟσᴧᴅιηɢ ■■■■□□</blockquote>")
+    await asyncio.sleep(0.3)
     await mystic.edit_text("<blockquote>❖ ʟσᴧᴅιηɢ ■■■■■■</blockquote>")
     
     plist_id = None
