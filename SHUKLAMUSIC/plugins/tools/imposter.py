@@ -29,9 +29,9 @@ MISHI = [
 ROY = [
     [
         InlineKeyboardButton(
-            text="ᴀᴅᴅ ᴍᴇ",
+            text="ᴧᴅᴅ ϻє",
             url=f"https://t.me/tidalxmusicbot?startgroup=true"),
-        InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇ", url=f"https://t.me/thedrxnet")
+        InlineKeyboardButton(text="ᴜᴘᴅᴧᴛє", url=f"https://t.me/thedrxnet")
     ],
 ]
 
@@ -55,8 +55,6 @@ async def chk_usr(_, message: Message):
         or lastname_before != message.from_user.last_name
     ):
         msg += f"""
-**♥︎ ᴜsᴇʀ sʜᴏʀᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ♥︎**
-
 **๏ ɴᴀᴍᴇ** ➛ {message.from_user.mention}
 **๏ ᴜsᴇʀ ɪᴅ** ➛ {message.from_user.id}
 """
@@ -68,7 +66,7 @@ async def chk_usr(_, message: Message):
             else "NO USERNAME"
         )
         msg += """
-**♥︎ ᴄʜᴀɴɢᴇᴅ ᴜsᴇʀɴᴀᴍᴇ ♥︎**
+**<pre>๏ ᴄʜᴀɴɢᴇᴅ ᴜsᴇʀɴᴀᴍᴇ</pre>**
 
 **๏ ʙᴇғᴏʀᴇ** ➛ {bef}
 **๏ ᴀғᴛᴇʀ** ➛ {aft}
