@@ -66,8 +66,8 @@ admin_20 : "<b>ᴇxᴀᴍᴘʟᴇ :</b>\n\n/seek ᴏʀ /seekback [ᴅᴜʀᴀᴛ
 admin_21 : "» ᴘʟᴇᴀsᴇ ᴜsᴇ ɴᴜᴍᴇʀɪᴄ ᴅɪɢɪᴛs ғᴏʀ sᴇᴇᴋɪɴɢ ɪɴ sᴇᴄᴏɴᴅs."
 admin_22 : "» ʟɪᴠᴇ sᴛʀᴇᴀᴍs ᴄᴀɴ'ᴛ ʙᴇ sᴇᴇᴋᴇᴅ."
 admin_23 : "» ᴛʀʏ sᴇᴇᴋɪɴɢ ᴡɪᴛʜ ᴀ ʟᴏᴡᴇʀ ᴅᴜʀᴀᴛɪᴏɴ.\n\nᴘʟᴀʏᴇᴅ <b>{0}</b> ᴏᴜᴛ ᴏғ <b>{1}</b> ᴍɪɴᴜᴛᴇs."
-admin_24 : "<b>sᴇᴇᴋɪɴɢ...</b>\n\nᴘʟᴇᴀsᴇ ʜᴏʟᴅ ᴏɴ..."
-admin_25 : "<i><pre>» sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ.\n\n<b>ᴅᴜʀᴀᴛɪᴏɴ :</b> {0} ᴍɪɴᴜᴛᴇs\n<b>ʙʏ :</b> {1}</pre></i>"
+admin_24 : "<blockquote expandable><b>sᴇᴇᴋɪɴɢ...</b>\n\nᴘʟᴇᴀsᴇ ʜᴏʟᴅ ᴏɴ...</blockquote>"
+admin_25 : "<blockquote>» sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ.</blockquote>\n\n</pre><b>ᴅᴜʀᴀᴛɪᴏɴ :</b> {0} ᴍɪɴᴜᴛᴇs\n<b>ʙʏ :</b> {1}</pre>"
 admin_26 : "ғᴀɪʟᴇᴅ ᴛᴏ sᴇᴇᴋ.</blockquote>"
 admin_27 : "» ᴏɴʟʏ ʏᴏᴜᴛᴜʙᴇ sᴛʀᴇᴀᴍ's sᴘᴇᴇᴅ ᴄᴀɴ ʙᴇ ᴄᴏɴᴛʀᴏʟʟᴇᴅ ᴄᴜʀʀᴇɴᴛʟʏ."
 admin_28 : "<b><u>{0} sᴘᴇᴇᴅ ᴄᴏɴᴛʀᴏʟ ᴘᴀɴᴇʟ</b></u>\n\nᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴄʜᴀɴɢᴇ ᴛʜᴇ sᴘᴇᴇᴅ ᴏғ ᴄᴜʀʀᴇɴᴛʟʏ ᴘʟᴀʏɪɴɢ sᴛʀᴇᴀᴍ ᴏɴ ᴠɪᴅᴇᴏᴄʜᴀᴛ."
@@ -208,7 +208,7 @@ queue_6 : "<b>🕚 ᴅᴜʀᴀᴛɪᴏɴ :</b> ᴜɴᴋɴᴏᴡɴ ᴅᴜʀᴀᴛ
 queue_7 : "\nᴄʟɪᴄᴋ ᴏɴ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴡʜᴏʟᴇ ǫᴜᴇᴜᴇᴅ ʟɪsᴛ."
 queue_8 : "<b>{0} ᴘʟᴀʏᴇʀ</b>\n\n🎄 <b>sᴛʀᴇᴀᴍɪɴɢ :</b> {1}\n\n🔗 <b>sᴛʀᴇᴀᴍ ᴛʏᴘᴇ :</b> {2}\n <b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {3}\n{4}"
 
-stream_1 : "<blockquote> <b>▣ Sᴛᴀʀᴛᴇᴅ Sᴛʀᴇᴀᴍɪɴɢ ♪</b></blockquote>\n<blockquote expandable><b>๏ Tɪᴛʟᴇ:</b> <a href={0}>{1}</a>\n<b>๏ Dᴜʀᴀᴛɪᴏɴ:</b> {2} ᴍɪɴᴜᴛᴇs\n๏ Rᴇǫᴜᴇsᴛᴇᴅ: {3}</blockquote>\n<blockquote>❖ ᴘᴏᴡєʀєᴅ» [𝛅 ⴕ ᧘ ᥧ 𝚱 𝛜 Ʀ](https://t.me/HEHE_STALKER)</blockquote>"
+stream_1 : "<blockquote> <b>▣ Sᴛᴧʀᴛєᴅ Sᴛʀєᴧϻιηɢ ♪</b></blockquote>\n<blockquote expandable><b>๏ Tιᴛʟє:</b> <a href={0}>{1}</a>\n<b>๏ Dᴜʀᴧᴛιση:</b> {2} ᴍιηᴜᴛєs\n๏ Rєǫᴜєsᴛєᴅ: {3}</blockquote>\n<blockquote>❖ ᴘᴏᴡєʀєᴅ» [愛|𝗦𝗧么𝗟𝗞𝚵𝗥](https://t.me/HEHE_STALKER)</blockquote>"
 stream_2 : "❍ <b>Sᴛʀᴇᴀᴍɪɴɢ Sᴛᴀʀᴛᴇᴅ </b>\n<b>❍ Sᴛʀᴇᴀᴍ ᴛʏᴘᴇ :</b> ʟɪᴠᴇ sᴛʀᴇᴀᴍ [ᴜʀʟ]\n<b>❍ Rᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {0}\n\n❖ ᴘᴏᴡᴇʀᴇᴅ ➥ [𝛅 ⴕ ᧘ ᥧ 𝚱 𝛜 Ʀ](https://t.me/HEHE_STALKER)"
 
 CLOSE_BUTTON  : "✧ ᴄʟᴏsᴇ ✧"
@@ -217,7 +217,7 @@ NEXT_PAGE: "🔘>"
 BACK_PAGE: "<🔘"
 
 
-S_B_1 : "✧ ᴀᴅᴅ ᴍᴇ ✧"
+S_B_1 : "✧ ᴧᴅᴅ ϻє ✧"
 S_B_2 : "˹ϻʏ ʜᴏϻє˼"
 S_B_3 : " ˹ᴛᴧᴘ тᴏ sєє ϻᴧɢɪᴄ˼"
 S_B_4 : " ˹ʜєʟᴘ ᴧηᴅ ᴄᴧϻϻᴧηᴅѕ˼ "
