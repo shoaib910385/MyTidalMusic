@@ -33,7 +33,7 @@ active_round = {}    # chat_id: {"answer": title, "guessed": False}
 # ------------------ SONGS (YOUTUBE) ------------------
 GUESS_SONGS = [
     {"title": "tu", "url": "https://youtu.be/4dkss90fdPc"},
-    {"title": "pal pal", "url": "https://youtu.be/Glvn2QxPwn0"},
+    {"title": "pal pal", "url": "https://youtu.be/HdZK0uJyfqM?si=LrIb-Cr-AXf5JSbd"},
     {"title": "295", "url": "https://youtu.be/n_FCrCQ6-bA"},
     {"title": "zaroorat", "url": "https://youtu.be/VMEXKJbsUmE"},
     {"title": "pasoori", "url": "https://youtu.be/IV_JCpPe3SM"},
@@ -120,9 +120,9 @@ async def start_round(chat_id):
     await app.send_message(
         chat_id,
         f"🎵 <b>Round {session['current']} of {session['rounds']}</b>\n"
-        f"Guess the song!\n"
+        f"<b>Guess the song!</b>\n"
         f"You have 60 seconds.\n"
-        f"Use: <code>/guess answer</code>"
+        f"Use: /guess <code>answer</code>"
     )
 
     # START STREAM IN VC
@@ -292,16 +292,20 @@ async def stop_game(client, message: Message):
 @app.on_message(filters.command("guessranking") & filters.group)
 async def ranking(client, message: Message):
 
+    chat_id = message.chat.id
+
     keyboard = InlineKeyboardMarkup(
         [
-            [
-                InlineKeyboardButton("🌍 Global Ranking", callback_data="gs_rank_global"),
-                InlineKeyboardButton("👥 Chat Ranking", callback_data=f"gs_rank_chat_{message.chat.id}")
-            ]
+            [InlineKeyboardButton("🌍 Global Ranking", callback_data=f"gs_rank_global_{chat_id}")],
+            [InlineKeyboardButton("👥 Chat Ranking", callback_data=f"gs_rank_chat_{chat_id}")],
+            [InlineKeyboardButton("❌ Close", callback_data="gs_rank_close")]
         ]
     )
 
-    await message.reply_text("📊 Choose ranking:", reply_markup=keyboard)
+    await message.reply_text(
+        "📊 Choose ranking:",
+        reply_markup=keyboard
+    )
 
 
 @app.on_callback_query(filters.regex("gs_rank_"))
@@ -309,12 +313,23 @@ async def ranking_show(client, query: CallbackQuery):
 
     data = query.data
 
+    # Close button
+    if data == "gs_rank_close":
+        return await query.message.delete()
+
+    # Extract chat_id  
+    parts = data.split("_")
+    mode = parts[2]       # global or chat
+    chat_id = int(parts[3])
+
+    # ------------------------------------------
     # GLOBAL RANK
-    if "global" in data:
+    # ------------------------------------------
+    if mode == "global":
 
         top = list(global_users.find().sort("points", -1).limit(10))
 
-        text = "🌍 **Global Ranking — Top 10**\n\n"
+        text = "🌍 <b>Global Ranking — Top 10</b>\n\n"
         rank = 1
         for user in top:
             try:
@@ -324,23 +339,43 @@ async def ranking_show(client, query: CallbackQuery):
             except:
                 pass
 
-        return await query.message.edit_text(text)
+        # Toggle UI
+        keyboard = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("👥 Chat Ranking", callback_data=f"gs_rank_chat_{chat_id}")],
+                [InlineKeyboardButton("❌ Close", callback_data="gs_rank_close")]
+            ]
+        )
 
+        return await query.message.edit_text(text, reply_markup=keyboard, parse_mode="html")
+
+
+    # ------------------------------------------
     # CHAT RANK
-    if "chat" in data:
+    # ------------------------------------------
+    if mode == "chat":
 
-        chat_id = int(data.split("_")[3])
-        top = list(chat_users.find({"chat_id": chat_id}).sort("points", -1).limit(10))
+        top_chat = list(
+            chat_users.find({"chat_id": chat_id}).sort("points", -1).limit(10)
+        )
 
-        if not top:
+        if not top_chat:
             return await query.message.edit_text("❌ No ranking data in this chat!")
 
-        text = "👥 **Lifetime Chat Ranking**\n\n"
+        text = "👥 <b>Lifetime Chat Ranking</b>\n\n"
         rank = 1
 
-        for doc in top:
+        for doc in top_chat:
             u = await app.get_users(doc["user_id"])
             text += f"{rank}. {u.mention} — {doc['points']} pts 🎯\n"
             rank += 1
 
-        return await query.message.edit_text(text)
+        # Toggle UI
+        keyboard = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("🌍 Global Ranking", callback_data=f"gs_rank_global_{chat_id}")],
+                [InlineKeyboardButton("❌ Close", callback_data="gs_rank_close")]
+            ]
+        )
+
+        return await query.message.edit_text(text, reply_markup=keyboard, parse_mode="html")
