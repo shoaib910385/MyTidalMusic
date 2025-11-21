@@ -119,9 +119,9 @@ async def start_round(chat_id):
     # Announce round
     await app.send_message(
         chat_id,
-        f"🎵 **Round {session['current']} of {session['rounds']}**\n"
+        f"🎵 Round {session['current']} of {session['rounds']}\n"
         f"Guess the song!\n"
-        f"You have **60 seconds**.\n"
+        f"You have 60 seconds.\n"
         f"Use: `/guess <answer>`"
     )
 
@@ -214,7 +214,7 @@ async def guess_handler(client, message: Message):
             pass
 
         await message.reply_text(
-            f"🎉 **Correct!**\n"
+            f"🎉 *Correct!*\n"
             f"Song was: **{answer.title()}**\n\n"
             f"🎁 +20 Points Earned\n"
             f"🏆 Total Score: **{total_points}**"
