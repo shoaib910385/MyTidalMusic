@@ -31,14 +31,8 @@ active_round = {}          # chat_id: {"answer": "", "winner": None, "guessed": 
 
 # Songs List
 GUESS_SONGS = [
-    {"title": "Saiyaara", "url": "https://www.youtube.com/watch?v=dvYMyqO2PZg"},
-    {"title": "Qatal", "url": "https://www.youtube.com/watch?v=pbxgHqPizRg"},
-    {"title": "Baby Doll", "url": "https://www.youtube.com/watch?v=ZKzuh0AQSBI"},
-    {"title": "Pink Lips", "url": "https://www.youtube.com/watch?v=KJhL7U95Ug8"},
-    {"title": "Tu Jaane Na", "url": "https://www.youtube.com/watch?v=WoBFeCRfV20"},
     {"title": "Offo", "url": "https://www.youtube.com/watch?v=ghzMGkZC4nY"},
     {"title": "Attention", "url": "https://www.youtube.com/watch?v=nfs8NYg7yQM"},
-    {"title": "Pal Pal Dil Ke Paas", "url": "https://www.youtube.com/watch?v=az4R5G5v1bA"},
     {"title": "Zaroorat", "url": "https://www.youtube.com/watch?v=GzU8KqOY8YA"},
 ]
 
