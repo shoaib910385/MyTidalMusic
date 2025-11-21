@@ -119,10 +119,10 @@ async def start_round(chat_id):
     # Announce round
     await app.send_message(
         chat_id,
-        f"🎵 Round {session['current']} of {session['rounds']}\n"
+        f"🎵 <b>Round {session['current']} of {session['rounds']}</b>\n"
         f"Guess the song!\n"
         f"You have 60 seconds.\n"
-        f"Use: `/guess <answer>`"
+        f"Use: <code>/guess answer</code>"
     )
 
     # START STREAM IN VC
