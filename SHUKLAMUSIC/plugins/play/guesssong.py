@@ -127,32 +127,30 @@ async def start_round(chat_id):
 
     # START STREAM IN VC
     try:
-    video_id = extract_video_id(song["url"])
-    yt = await YouTube.track(video_id)
-
-    # If failed to fetch metadata → end round and go next
-    if yt is None or isinstance(yt, str):
-        await app.send_message(chat_id, "❌ Failed to load YouTube audio. Skipping this round...")
+        video_id = extract_video_id(song["url"])
+        yt = await YouTube.track(video_id)
+        
+        if yt is None or isinstance(yt, str):
+            await app.send_message(chat_id, "❌ Failed to load YouTube audio. Skipping this round...")
+            del active_round[chat_id]
+            return await start_round(chat_id)
+            
+            details, _id = yt  # SAFE now
+            await stream(
+                _id,
+                None,
+                None,
+                details,
+                chat_id,
+                "GuessGame",
+                chat_id,
+                streamtype="youtube",
+            )
+    
+    except Exception as e:
+        await app.send_message(chat_id, f"❌ Error streaming song.\n{e}")
         del active_round[chat_id]
         return await start_round(chat_id)
-
-    details, _id = yt  # SAFE now
-
-    await stream(
-        _id,
-        None,
-        None,
-        details,
-        chat_id,
-        "GuessGame",
-        chat_id,
-        streamtype="youtube",
-    )
-
-except Exception as e:
-    await app.send_message(chat_id, f"❌ Error streaming song.\n{e}")
-    del active_round[chat_id]
-    return await start_round(chat_id)
 
     # Timer for 60 seconds
     await asyncio.sleep(60)
