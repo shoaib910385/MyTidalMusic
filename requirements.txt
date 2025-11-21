@@ -9,6 +9,7 @@ telebot==0.0.5
 bing_image_downloader 
 beautifulsoup4
 bs4
+rapidfuzz
 cloudscraper
 deepai
 dnspython
@@ -32,6 +33,7 @@ openai==0.28.0
 opencv-python
 pillow==9.5.0
 psutil
+pymongo
 pickledb
 pycountry
 pycryptodome
