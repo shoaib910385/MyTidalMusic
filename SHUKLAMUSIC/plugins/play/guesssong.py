@@ -154,8 +154,10 @@ async def start_round(chat_id):
     if chat_id in active_round and not active_round[chat_id]["guessed"]:
         try:
             await SHUKLA.stop_stream(chat_id)
-            except:
-                try:
+            
+        except:
+            
+            try:
                     await SHUKLA.leave_group_call(chat_id)
                     except:
                         pass
