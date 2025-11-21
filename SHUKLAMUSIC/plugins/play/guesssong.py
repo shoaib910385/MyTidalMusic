@@ -69,9 +69,6 @@ async def is_admin(client, message: Message):
 @LanguageStart
 async def guess_song_cmd(client, message: Message, _):
 
-    if not await is_admin(client, message):
-        return await message.reply_text("❌ Only admins can start Guess Song Game!")
-
     chat_id = message.chat.id
 
     if chat_id in game_sessions:
