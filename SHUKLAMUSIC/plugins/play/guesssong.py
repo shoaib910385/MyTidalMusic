@@ -1,7 +1,5 @@
 import random
 import asyncio
-from urllib.parse import urlparse, parse_qs
-
 from pyrogram import filters
 from pyrogram.types import (
     Message,
@@ -10,8 +8,7 @@ from pyrogram.types import (
     CallbackQuery
 )
 
-from config import BANNED_USERS
-from SHUKLAMUSIC import app, YouTube
+from SHUKLAMUSIC import app
 from SHUKLAMUSIC.core.call import SHUKLA
 from SHUKLAMUSIC.utils.stream.stream import stream
 from SHUKLAMUSIC.utils.decorators.language import LanguageStart
@@ -19,214 +16,223 @@ from SHUKLAMUSIC.utils.decorators.language import LanguageStart
 from pymongo import MongoClient
 from rapidfuzz import fuzz
 
-MONGO_DB_URL=["mongodb+srv://arrush:Arrush123@arrush0.w4uwjly.mongodb.net/?retryWrites=true&w=majority&appName=arrush0"]
-# MongoDB Setup
-mongo = MongoClient(MONGO_DB_URL)
+# ------------------ MONGO ------------------
+MONGO_DB = "mongodb+srv://arrush:Arrush123@arrush0.w4uwjly.mongodb.net/?retryWrites=true&w=majority&appName=arrush0"
+mongo = MongoClient(MONGO_DB)
+
 db = mongo["GuessSong"]
-users_col = db["Users"]
+global_users = db["GlobalUsers"]      # lifetime total points
+chat_users = db["ChatUsers"]          # lifetime per-group points
 
-# Store Games
-game_sessions = {}         # chat_id: {rounds, current_round, scores, players}
-active_round = {}          # chat_id: {"answer": "", "winner": None, "guessed": False}
+# ------------------ GAME STORAGE ------------------
+game_sessions = {}   # chat_id: {rounds, current, session_scores}
+active_round = {}    # chat_id: {"answer": title, "guessed": False}
 
-# Songs List
+# ------------------ SONGS (.ogg) ------------------
 GUESS_SONGS = [
-    {"title": "Offo", "url": "https://www.youtube.com/watch?v=ghzMGkZC4nY"},
-    {"title": "Attention", "url": "https://www.youtube.com/watch?v=nfs8NYg7yQM"},
-    {"title": "Zaroorat", "url": "https://www.youtube.com/watch?v=GzU8KqOY8YA"},
+    {"title": "Attention", "audio": "https://files.catbox.moe/s60zrl.ogg"},
+    {"title": "saiyara", "audio": "https://files.catbox.moe/xg44ng.ogg"},
+    {"title": "levitating", "audio": "https://files.catbox.moe/xb2npe.ogg"},
 ]
 
-
-# Extract Video ID
-def extract_video_id(url):
-    query = urlparse(url)
-    if query.hostname == "youtu.be":
-        return query.path[1:]
-    if query.hostname in ("www.youtube.com", "youtube.com"):
-        if query.path == "/watch":
-            return parse_qs(query.query).get("v", [None])[0]
-        if query.path.startswith("/embed/") or query.path.startswith("/v/"):
-            return query.path.split("/")[2]
-    return None
-
-
-# ----------------------- ADMIN CHECK -----------------------
-async def is_admin(client, message: Message):
-    try:
-        member = await client.get_chat_member(message.chat.id, message.from_user.id)
-        return member.status in ("administrator", "creator")
-    except:
-        return False
-
-# ----------------------- START COMMAND -----------------------
-@app.on_message(filters.command(["guesssong"]) & filters.group & ~BANNED_USERS)
+# ---------------------------------------------------------
+# START GAME
+# ---------------------------------------------------------
+@app.on_message(filters.command("guesssong") & filters.group)
 @LanguageStart
-async def guess_song_cmd(client, message: Message, _):
+async def start_game(client, message: Message, _):
 
     chat_id = message.chat.id
 
     if chat_id in game_sessions:
         return await message.reply_text("⚠️ A game is already running here!")
 
-    # Ask number of rounds
-    buttons = InlineKeyboardMarkup(
+    keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("3 Songs", callback_data=f"gs_rounds_3"),
-                InlineKeyboardButton("5 Songs", callback_data=f"gs_rounds_5"),
+                InlineKeyboardButton("3 Songs", callback_data="gs_rounds_3"),
+                InlineKeyboardButton("5 Songs", callback_data="gs_rounds_5"),
             ]
         ]
     )
 
-    await message.reply_text("🎮 Select number of rounds:", reply_markup=buttons)
+    await message.reply_text(
+        "🎮 **Choose number of rounds:**",
+        reply_markup=keyboard
+    )
 
-
-# -------------------------- CALLBACK FOR ROUNDS --------------------------
+# ---------------------------------------------------------
+# HANDLE ROUNDS CHOICE
+# ---------------------------------------------------------
 @app.on_callback_query(filters.regex("gs_rounds_"))
-async def gs_rounds_callback(client, query: CallbackQuery):
+async def round_choice(client, query: CallbackQuery):
+
     chat_id = query.message.chat.id
     rounds = int(query.data.split("_")[2])
 
     game_sessions[chat_id] = {
         "rounds": rounds,
         "current": 0,
-        "scores": {},  # user_id: correct_count
+        "session_scores": {}   # per game score (temporary)
     }
 
     await query.message.edit_text(f"🎧 Guess Song Game Started!\nRounds: {rounds}")
 
-    await start_next_round(chat_id, query.message)
+    await start_round(chat_id)
 
 
-# -------------------------- SINGLE ROUND FUNCTION --------------------------
-async def start_next_round(chat_id, msg_obj):
+# ---------------------------------------------------------
+# START ONE ROUND
+# ---------------------------------------------------------
+async def start_round(chat_id):
+
     session = game_sessions.get(chat_id)
     if not session:
         return
 
+    # FINISHED?
     if session["current"] >= session["rounds"]:
         return await end_game(chat_id)
 
     session["current"] += 1
 
     song = random.choice(GUESS_SONGS)
-    answer = song["title"].strip().lower()
+    title = song["title"].lower()
 
-    video_id = extract_video_id(song["url"])
-    if not video_id:
-        return await app.send_message(chat_id, "❌ Invalid YouTube Link.")
-
-    try:
-        details, _id = await YouTube.track(video_id)
-    except:
-        return await app.send_message(chat_id, "❌ Failed to get song details.")
-
-    # Save round info
     active_round[chat_id] = {
-        "answer": answer,
-        "guessed": False,
-        "winner": None,
+        "answer": title,
+        "guessed": False
     }
 
     await app.send_message(
         chat_id,
-        f"🎵 **Round {session['current']} of {session['rounds']}**\nGuess the song! You have **60 seconds**.\nUse `/guess your answer`"
+        f"🎵 **Round {session['current']} of {session['rounds']}**\n"
+        f"Guess the song!\nYou have **60 seconds**.\n"
+        f"Use: `/guess your answer`"
     )
 
+    # PLAY AUDIO
     try:
         await stream(
-            _id,
+            song["audio"],
             None,
             None,
-            details,
+            None,
             chat_id,
             "GuessGame",
             chat_id,
-            streamtype="youtube",
+            streamtype="local",
         )
     except:
-        return await app.send_message(chat_id, "❌ Failed to play song in VC.")
+        return await app.send_message(chat_id, "❌ Error playing audio.")
 
-    await asyncio.sleep(10)
-    try:
-        await SHUKLA.leave_group_call(chat_id)
-    except:
-        pass
+    # 60 sec timeout
+    await asyncio.sleep(60)
 
-    # Wait 60 seconds for guesses
-    await asyncio.sleep(50)
+    if chat_id in active_round and not active_round[chat_id]["guessed"]:
+        # Stop audio
+        try:
+            await SHUKLA.leave_group_call(chat_id)
+        except:
+            pass
 
-    session = game_sessions.get(chat_id)
-    round_data = active_round.get(chat_id)
-
-    if session and round_data and not round_data["guessed"]:
-        await app.send_message(chat_id, "⏱ No correct guess! Moving to next round...")
+        await app.send_message(chat_id, "⏱ No guesses! Moving to next round...")
         del active_round[chat_id]
 
-    await start_next_round(chat_id, msg_obj)
+    await start_round(chat_id)
 
 
-# -------------------------- GUESS COMMAND --------------------------
-@app.on_message(filters.command(["guess"]) & filters.group & ~BANNED_USERS)
+# ---------------------------------------------------------
+# GUESS COMMAND
+# ---------------------------------------------------------
+@app.on_message(filters.command("guess") & filters.group)
 async def guess_handler(client, message: Message):
 
     chat_id = message.chat.id
+
     if chat_id not in active_round:
-        return await message.reply_text("❌ No active round right now.")
+        return await message.reply_text("❌ No active round!")
 
-    round_data = active_round[chat_id]
+    guess_text = message.text.split(" ", 1)
+    if len(guess_text) < 2:
+        return await message.reply_text("❗Usage: `/guess your answer`")
 
-    parts = message.text.split(" ", 1)
-    if len(parts) < 2:
-        return await message.reply_text("❗Usage: `/guess your answer`", quote=True)
+    guess = guess_text[1].strip().lower()
+    answer = active_round[chat_id]["answer"]
 
-    guess = parts[1].strip().lower()
-    answer = round_data["answer"]
+    # FUZZY MATCH
+    if fuzz.ratio(guess, answer) >= 70:
 
-    # Fuzzy match
-    score = fuzz.ratio(guess, answer)
-
-    if score >= 70:  # match success
-        if round_data["guessed"]:
+        if active_round[chat_id]["guessed"]:
             return
 
-        round_data["guessed"] = True
-        round_data["winner"] = message.from_user.id
+        active_round[chat_id]["guessed"] = True
+        user_id = message.from_user.id
 
-        # Update game session scores
-        game_sessions[chat_id]["scores"][message.from_user.id] = \
-            game_sessions[chat_id]["scores"].get(message.from_user.id, 0) + 1
+        # Update per-game score
+        game_sessions[chat_id]["session_scores"][user_id] = (
+            game_sessions[chat_id]["session_scores"].get(user_id, 0) + 1
+        )
 
-        # Mongo points (20 per correct)
-        users_col.update_one(
-            {"user_id": message.from_user.id},
+        # 20 points to GLOBAL ranking
+        global_users.update_one(
+            {"user_id": user_id},
             {"$inc": {"points": 20}},
             upsert=True,
         )
 
-        mention = message.from_user.mention
-        await message.reply_text(f"🎉 {mention} guessed it right!\nCorrect answer: **{answer.title()}**")
+        # 20 points to CHAT ranking
+        chat_users.update_one(
+            {"chat_id": chat_id, "user_id": user_id},
+            {"$inc": {"points": 20}},
+            upsert=True
+        )
+
+        # fetch total global points
+        total_points = global_users.find_one({"user_id": user_id})["points"]
+
+        # stop audio
+        try:
+            await SHUKLA.leave_group_call(chat_id)
+        except:
+            pass
+
+        await message.reply_text(
+            f"🎉 **Congratulations!**\n"
+            f"Correct song: **{answer.title()}**\n\n"
+            f"🎁 You earned **+20 points**\n"
+            f"🏆 Total Points: **{total_points}**"
+        )
 
         del active_round[chat_id]
-        return
+
+        await start_round(chat_id)
 
     else:
-        return await message.reply_text("❌ Wrong guess, try harder!")
+        await message.reply_text("❌ Wrong guess! Try again.")
 
 
-# -------------------------- END GAME --------------------------
+# ---------------------------------------------------------
+# END GAME
+# ---------------------------------------------------------
 async def end_game(chat_id):
+
     session = game_sessions.get(chat_id)
     if not session:
         return
 
-    result = sorted(session["scores"].items(), key=lambda x: x[1], reverse=True)
+    results = sorted(
+        session["session_scores"].items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
 
-    text = "🏁 **Game Ended!**\n\n**Top Players:**\n"
+    text = "🏁 **GAME OVER**\n\n**Top Players This Game:**\n\n"
+
     rank = 1
-    for user_id, score in result:
-        user = await app.get_users(user_id)
-        text += f"**{rank}. {user.mention} — {score} correct**\n"
+    for user_id, score in results:
+        u = await app.get_users(user_id)
+        text += f"{rank}. {u.mention} — {score} correct 🎯\n"
         rank += 1
 
     await app.send_message(chat_id, text)
@@ -236,57 +242,90 @@ async def end_game(chat_id):
         del active_round[chat_id]
 
 
-# -------------------------- GLOBAL RANKING --------------------------
-@app.on_message(filters.command(["guessranking"]) & ~BANNED_USERS)
-async def ranking_cmd(client, message: Message):
+# ---------------------------------------------------------
+# STOP GAME
+# ---------------------------------------------------------
+@app.on_message(filters.command("stopgame") & filters.group)
+async def stopgame(client, message: Message):
 
-    buttons = InlineKeyboardMarkup(
+    chat_id = message.chat.id
+
+    if chat_id not in game_sessions:
+        return await message.reply_text("❌ No active game to stop.")
+
+    try:
+        await SHUKLA.leave_group_call(chat_id)
+    except:
+        pass
+
+    del game_sessions[chat_id]
+    if chat_id in active_round:
+        del active_round[chat_id]
+
+    await message.reply_text("🛑 Guess Song Game has been stopped.")
+
+
+# ---------------------------------------------------------
+# RANKING SYSTEM
+# ---------------------------------------------------------
+@app.on_message(filters.command("guessranking") & filters.group)
+async def ranking_menu(client, message: Message):
+
+    keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("🌍 Global", callback_data="gs_rank_global"),
-                InlineKeyboardButton("👥 This Chat", callback_data=f"gs_rank_chat_{message.chat.id}"),
+                InlineKeyboardButton("🌍 Global Ranking", callback_data="gs_rank_global"),
+                InlineKeyboardButton("👥 Chat Ranking", callback_data=f"gs_rank_chat_{message.chat.id}")
             ]
         ]
     )
 
-    await message.reply_text("📊 Choose Ranking Type:", reply_markup=buttons)
+    await message.reply_text(
+        "📊 Choose ranking type:",
+        reply_markup=keyboard
+    )
 
 
 @app.on_callback_query(filters.regex("gs_rank_"))
-async def ranking_callback(client, query: CallbackQuery):
+async def ranking_show(client, query: CallbackQuery):
 
     data = query.data
 
-    # Global Ranking
+    # -------- GLOBAL RANKING --------
     if "global" in data:
-        all_users = list(users_col.find().sort("points", -1).limit(10))
-        text = "🌍 **Global Top 10 Guessers**\n\n"
+
+        top_users = list(global_users.find().sort("points", -1).limit(10))
+
+        text = "🌍 **Global Ranking — Top 10 Players**\n\n"
         rank = 1
-        for u in all_users:
+        for user in top_users:
             try:
-                user = await app.get_users(u["user_id"])
-                text += f"{rank}. {user.mention} — {u['points']} pts\n"
+                u = await app.get_users(user["user_id"])
+                text += f"{rank}. {u.mention} — {user['points']} pts 🏆\n"
+                rank += 1
             except:
                 pass
-            rank += 1
 
         return await query.message.edit_text(text)
 
-    # Chat Ranking
+
+    # -------- CHAT RANKING --------
     if "chat" in data:
+
         chat_id = int(data.split("_")[3])
-        session = game_sessions.get(chat_id)
 
-        if not session or not session["scores"]:
-            return await query.message.edit_text("❌ No players in this chat ranking!")
+        top_chat = list(
+            chat_users.find({"chat_id": chat_id}).sort("points", -1).limit(10)
+        )
 
-        sorted_players = sorted(session["scores"].items(), key=lambda x: x[1], reverse=True)
+        if not top_chat:
+            return await query.message.edit_text("❌ No ranking data for this chat!")
 
-        text = "👥 **Chat Ranking**\n\n"
+        text = "👥 **Lifetime Chat Ranking**\n\n"
         rank = 1
-        for user_id, score in sorted_players:
-            user = await app.get_users(user_id)
-            text += f"{rank}. {user.mention} — {score} correct\n"
+        for doc in top_chat:
+            u = await app.get_users(doc["user_id"])
+            text += f"{rank}. {u.mention} — {doc['points']} pts 🎯\n"
             rank += 1
 
-        await query.message.edit_text(text)
+        return await query.message.edit_text(text)
