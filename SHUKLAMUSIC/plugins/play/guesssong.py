@@ -58,7 +58,6 @@ def extract_video_id(url):
 # START GAME
 # ---------------------------------------------------------
 @app.on_message(filters.command("guesssong") & filters.group)
-@LanguageStart
 async def start_game(client, message: Message, _):
 
     chat_id = message.chat.id
