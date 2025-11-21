@@ -128,7 +128,10 @@ async def start_round(chat_id):
     # START STREAM IN VC
     try:
         video_id = extract_video_id(song["url"])
-        details, _id = await YouTube.track(video_id)
+        yt = await YouTube.track(video_id)
+        if yt is None or isinstance(yt, str):
+            return await app.send_message(chat_id, "❌ Failed to fetch YouTube audio.")
+            details, _id = yt
 
         await stream(
             _id,
@@ -150,9 +153,12 @@ async def start_round(chat_id):
     # If not guessed
     if chat_id in active_round and not active_round[chat_id]["guessed"]:
         try:
-            await SHUKLA.leave_group_call(chat_id)
-        except:
-            pass
+            await SHUKLA.stop_stream(chat_id)
+            except:
+                try:
+                    await SHUKLA.leave_group_call(chat_id)
+                    except:
+                        pass
 
         await app.send_message(chat_id, "⏱ No guesses! Next round...")
         del active_round[chat_id]
