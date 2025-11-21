@@ -20,6 +20,8 @@ ASSUSERNAME = getenv("ASSUSERNAME", "THEDRXNET")
 # MongoDB
 MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 
+MONGO_DB_URL = getenv("MONGO_DB_URI", None)
+
 # -----------------------------
 # YouTube API configuration
 API_URL = getenv("API_URL", 'https://api.thequickearn.xyz') #youtube song url
