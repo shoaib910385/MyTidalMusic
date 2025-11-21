@@ -19,8 +19,7 @@ ASSUSERNAME = getenv("ASSUSERNAME", "THEDRXNET")
 
 # MongoDB
 MONGO_DB_URI = getenv("MONGO_DB_URI", None)
-
-MONGO_DB_URL = getenv("MONGO_DB_URI", None)
+MONGO_DB_URL = getenv("MONGO_DB_URL", None)
 
 # -----------------------------
 # YouTube API configuration
