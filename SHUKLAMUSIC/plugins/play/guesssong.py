@@ -357,7 +357,7 @@ async def ranking_show(client, query: CallbackQuery):
             ]
         )
 
-        return await query.message.edit_text(text, reply_markup=keyboard, parse_mode="html")
+        return await query.message.edit_text(text, reply_markup=keyboard)
 
 
     # ------------------------------------------
@@ -388,4 +388,4 @@ async def ranking_show(client, query: CallbackQuery):
             ]
         )
 
-        return await query.message.edit_text(text, reply_markup=keyboard, parse_mode="html")
+        return await query.message.edit_text(text, reply_markup=keyboard)
