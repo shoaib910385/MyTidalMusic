@@ -1,24 +1,22 @@
 import requests
 from SHUKLAMUSIC import app
-from pyrogram.types import Message
 from pyrogram.enums import ChatAction
 from pyrogram import filters
 import base64
 
 API_KEY = "AIzaSyB80G8SE81LF0Dc5MNFsKIXqOEzK1KA7wM"
 
-# TEXT MODEL
-TEXT_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key={API_KEY}"
-
-# IMAGE MODEL
-IMAGE_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-1:generateImage?key={API_KEY}"
+# NEW GOOGLE API ENDPOINTS
+TEXT_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
+IMAGE_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0:generateImage?key={API_KEY}"
 
 # Keywords that trigger image generation
 IMAGE_KEYWORDS = [
     "image", "photo", "picture", "draw", "generate an image",
     "create an image", "make an image", "ai image", "create photo",
-    "generate photo", "draw me", "make a picture"
+    "generate photo", "draw me", "make a picture", "image of", "picture of"
 ]
+
 
 @app.on_message(
     filters.command(
@@ -33,50 +31,53 @@ async def ai_handler(bot, message):
         if len(message.command) < 2:
             return await message.reply_text("❍ Example:\n\n/ai create an image of a cute robot")
 
-        query = message.text.split(" ", 1)[1].lower()
+        query = message.text.split(" ", 1)[1]
 
         # Detect if the user wants to generate an image
-        is_image_prompt = any(kw in query for kw in IMAGE_KEYWORDS)
+        is_image_prompt = any(kw in query.lower() for kw in IMAGE_KEYWORDS)
 
-        # -------------------------
-        # 1) IMAGE GENERATION
-        # -------------------------
+        # ---------------------------------------------------------
+        # 1) IMAGE GENERATION (IMAGEN 3.0 NEW ENDPOINT)
+        # ---------------------------------------------------------
         if is_image_prompt:
-            await message.reply_text("🖼 Generating image... Please wait 4–6 seconds.")
+            waiting = await message.reply_text("🖼 Generating image... Please wait 4–6 seconds.")
 
             payload = {
-                "prompt": query,
-                "numImages": 1,
-                "width": 1024,
-                "height": 1024
+                "prompt": {
+                    "textPrompt": {
+                        "text": query
+                    }
+                }
             }
 
             response = requests.post(IMAGE_MODEL_URL, json=payload)
 
             if response.status_code != 200:
-                return await message.reply_text(
+                return await waiting.edit_text(
                     f"❍ ERROR generating image\nStatus Code: {response.status_code}\nResponse: {response.text}"
                 )
 
             data = response.json()
 
             try:
-                img_base64 = data["images"][0]["imageBytes"]
+                # New imagen-3.0 format
+                img_base64 = data["images"][0]["image"]
                 img_bytes = base64.b64decode(img_base64)
-            except:
-                return await message.reply_text("❍ ERROR: Invalid image response from Google API.")
+            except Exception as e:
+                return await waiting.edit_text(f"❍ ERROR: Invalid image response.\n{e}")
 
-            # Upload the generated image
             await bot.send_photo(
                 chat_id=message.chat.id,
                 photo=img_bytes,
                 caption="✨ **AI Generated Image**"
             )
+
+            await waiting.delete()
             return
 
-        # -------------------------
-        # 2) TEXT GENERATION
-        # -------------------------
+        # ---------------------------------------------------------
+        # 2) TEXT GENERATION (GEMINI 2.5 FLASH NEW ENDPOINT)
+        # ---------------------------------------------------------
         payload = {
             "contents": [
                 {"parts": [{"text": query}]}
@@ -94,8 +95,8 @@ async def ai_handler(bot, message):
 
         try:
             result = data["candidates"][0]["content"]["parts"][0]["text"]
-        except:
-            return await message.reply_text("❍ ERROR: Invalid text response format.")
+        except Exception as e:
+            return await message.reply_text(f"❍ ERROR: Invalid text response.\n{e}")
 
         await message.reply_text(result)
 
