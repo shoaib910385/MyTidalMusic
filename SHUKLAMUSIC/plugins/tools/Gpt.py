@@ -3,6 +3,7 @@ from SHUKLAMUSIC import app
 from pyrogram.enums import ChatAction
 from pyrogram import filters
 import base64
+from os import getenv
 
 API_KEY = getenv("GEMINI_API")
 
