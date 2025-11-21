@@ -58,9 +58,11 @@ def extract_video_id(url):
 
 # ----------------------- ADMIN CHECK -----------------------
 async def is_admin(client, message: Message):
-    member = await message.chat.get_member(message.from_user.id)
-    return member.status in ("administrator", "creator")
-
+    try:
+        member = await client.get_chat_member(message.chat.id, message.from_user.id)
+        return member.status in ("administrator", "creator")
+    except:
+        return False
 
 # ----------------------- START COMMAND -----------------------
 @app.on_message(filters.command(["guesssong"]) & filters.group & ~BANNED_USERS)
