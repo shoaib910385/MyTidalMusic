@@ -6,9 +6,9 @@ import base64
 
 API_KEY = "AIzaSyB80G8SE81LF0Dc5MNFsKIXqOEzK1KA7wM"
 
-# NEW GOOGLE API ENDPOINTS
+# NEW GOOGLE API ENDPOINTS (LATEST)
 TEXT_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
-IMAGE_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0:generateImage?key={API_KEY}"
+IMAGE_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={API_KEY}"
 
 # Keywords that trigger image generation
 IMAGE_KEYWORDS = [
@@ -33,21 +33,23 @@ async def ai_handler(bot, message):
 
         query = message.text.split(" ", 1)[1]
 
-        # Detect if the user wants to generate an image
+        # Detect if image prompt
         is_image_prompt = any(kw in query.lower() for kw in IMAGE_KEYWORDS)
 
-        # ---------------------------------------------------------
-        # 1) IMAGE GENERATION (IMAGEN 3.0 NEW ENDPOINT)
-        # ---------------------------------------------------------
+        # -------------------------------------------------------------------
+        # 1) IMAGE GENERATION (gemini-2.5-flash-image)
+        # -------------------------------------------------------------------
         if is_image_prompt:
             waiting = await message.reply_text("🖼 Generating image... Please wait 4–6 seconds.")
 
             payload = {
-                "prompt": {
-                    "textPrompt": {
-                        "text": query
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": query}
+                        ]
                     }
-                }
+                ]
             }
 
             response = requests.post(IMAGE_MODEL_URL, json=payload)
@@ -60,11 +62,14 @@ async def ai_handler(bot, message):
             data = response.json()
 
             try:
-                # New imagen-3.0 format
-                img_base64 = data["images"][0]["image"]
+                # New output format
+                img_base64 = data["candidates"][0]["content"]["parts"][0]["inline_data"]["data"]
                 img_bytes = base64.b64decode(img_base64)
+
             except Exception as e:
-                return await waiting.edit_text(f"❍ ERROR: Invalid image response.\n{e}")
+                return await waiting.edit_text(
+                    f"❍ ERROR: Invalid image response.\n{e}\n\nRaw data:\n{data}"
+                )
 
             await bot.send_photo(
                 chat_id=message.chat.id,
@@ -75,9 +80,9 @@ async def ai_handler(bot, message):
             await waiting.delete()
             return
 
-        # ---------------------------------------------------------
-        # 2) TEXT GENERATION (GEMINI 2.5 FLASH NEW ENDPOINT)
-        # ---------------------------------------------------------
+        # -------------------------------------------------------------------
+        # 2) TEXT GENERATION (gemini-2.5-flash)
+        # -------------------------------------------------------------------
         payload = {
             "contents": [
                 {"parts": [{"text": query}]}
