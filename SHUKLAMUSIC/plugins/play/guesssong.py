@@ -307,7 +307,7 @@ async def ranking(client, message: Message):
 
     keyboard = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("🌍 Global Ranking", callback_data=f"gs_rank_global")],
+            [InlineKeyboardButton("🌍 Global Ranking", callback_data=f"gs_rank_global_{chat_id}")],
             [InlineKeyboardButton("👥 Chat Ranking", callback_data=f"gs_rank_chat_{chat_id}")],
             [InlineKeyboardButton("❌ Close", callback_data="gs_rank_close")]
         ]
@@ -353,7 +353,7 @@ async def ranking_show(client, query: CallbackQuery):
         # Toggle UI
         keyboard = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("👥 Chat Ranking", callback_data=f"gs_rank_chat")],
+                [InlineKeyboardButton("👥 Chat Ranking", callback_data=f"gs_rank_chat_{chat_id}")],
                 [InlineKeyboardButton("❌ Close", callback_data="gs_rank_close")]
             ]
         )
