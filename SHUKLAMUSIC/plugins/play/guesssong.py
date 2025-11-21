@@ -134,19 +134,21 @@ async def start_round(chat_id):
             await app.send_message(chat_id, "❌ Failed to load YouTube audio. Skipping this round...")
             del active_round[chat_id]
             return await start_round(chat_id)
-            
-            details, _id = yt  # SAFE now
-            await stream(
-                _id,
-                None,
-                None,
-                details,
-                chat_id,
-                "GuessGame",
-                chat_id,
-                streamtype="youtube",
-            )
-    
+
+        # SAFE unpack
+        details, _id = yt
+
+        await stream(
+            _id,
+            None,
+            None,
+            details,
+            chat_id,
+            "GuessGame",
+            chat_id,
+            streamtype="youtube",
+        )
+
     except Exception as e:
         await app.send_message(chat_id, f"❌ Error streaming song.\n{e}")
         del active_round[chat_id]
@@ -161,11 +163,12 @@ async def start_round(chat_id):
             await SHUKLA.stop_stream(chat_id)
             
         except:
-            
+            pass
             try:
-                    await SHUKLA.leave_group_call(chat_id)
-                    
+                await SHUKLA.leave_group_call(chat_id)
+                
             except:
+                
                 pass
 
         await app.send_message(chat_id, "⏱ No guesses! Next round...")
