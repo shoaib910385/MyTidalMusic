@@ -10,7 +10,7 @@ from pyrogram.types import (
     CallbackQuery
 )
 
-from config import BANNED_USERS, MONGO_DB_URL
+from config import BANNED_USERS
 from SHUKLAMUSIC import app, YouTube
 from SHUKLAMUSIC.core.call import SHUKLA
 from SHUKLAMUSIC.utils.stream.stream import stream
@@ -19,6 +19,7 @@ from SHUKLAMUSIC.utils.decorators.language import LanguageStart
 from pymongo import MongoClient
 from rapidfuzz import fuzz
 
+MONGO_DB_URL=["mongodb+srv://arrush:Arrush123@arrush0.w4uwjly.mongodb.net/?retryWrites=true&w=majority&appName=arrush0"]
 # MongoDB Setup
 mongo = MongoClient(MONGO_DB_URL)
 db = mongo["GuessSong"]
