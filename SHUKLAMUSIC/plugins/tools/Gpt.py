@@ -4,7 +4,7 @@ from pyrogram.enums import ChatAction
 from pyrogram import filters
 import base64
 
-API_KEY = "AIzaSyB80G8SE81LF0Dc5MNFsKIXqOEzK1KA7wM"
+API_KEY = getenv("GEMINI_API")
 
 # NEW GOOGLE API ENDPOINTS (LATEST)
 TEXT_MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
