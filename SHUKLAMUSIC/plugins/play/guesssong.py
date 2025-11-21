@@ -159,8 +159,9 @@ async def start_round(chat_id):
             
             try:
                     await SHUKLA.leave_group_call(chat_id)
-                    except:
-                        pass
+                    
+            except:
+                pass
 
         await app.send_message(chat_id, "⏱ No guesses! Next round...")
         del active_round[chat_id]
