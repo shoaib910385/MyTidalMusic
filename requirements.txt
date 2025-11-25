@@ -4,7 +4,7 @@ apscheduler
 asyncio
 bard
 stripe==10.7.0
-mysql-connector-python
+mysql-connector-python==9.0.0
 telebot
 bing_image_downloader
 beautifulsoup4
@@ -39,6 +39,7 @@ pydub
 pyfiglet
 pykeyboard
 python-dotenv
+python-telegram-bot==21.1.1
 python-whois
 pyshorteners
 pyttsx3
