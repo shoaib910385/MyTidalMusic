@@ -60,11 +60,10 @@ telegraph
 tgcrypto
 unidecode
 wget
+yt-dlp
 youtube-search
-py-yt-search
-py_yt
 youtube-search-python
-youtube_dl==2021.12.17
-git+https://github.com/yt-dlp/yt-dlp
+py-yt-search
 git+https://github.com/AsmSafone/SafoneAPI
+
 
