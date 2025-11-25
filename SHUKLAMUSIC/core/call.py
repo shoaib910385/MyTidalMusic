@@ -1,4 +1,16 @@
 # -----------------------------------------------
+# 🔸 StrangerMusic Project
+# 🔹 Developed & Maintained by: Shashank Shukla (https://github.com/itzshukla)
+# 📅 Copyright © 2022 – All Rights Reserved
+#
+# 📖 License:
+# This source code is open for educational and non-commercial use ONLY.
+# You are required to retain this credit in all copies or substantial portions of this file.
+# Commercial use, redistribution, or removal of this notice is strictly prohibited
+# without prior written permission from the author.
+#
+# ❤️ Made with dedication and love by ItzShukla
+# -----------------------------------------------
 import asyncio
 import os
 from datetime import datetime, timedelta
@@ -34,7 +46,7 @@ from SHUKLAMUSIC.utils.exceptions import AssistantErr
 from SHUKLAMUSIC.utils.formatters import check_duration, seconds_to_min, speed_converter
 from SHUKLAMUSIC.utils.inline.play import stream_markup
 from SHUKLAMUSIC.utils.stream.autoclear import auto_clean
-from SHUKLAMUSIC.utils.thumbnails import gen_thumb
+from SHUKLAMUSIC.utils.thumbnails import get_thumb
 from strings import get_string
 
 autoend = {}
@@ -388,7 +400,7 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_6"],
                     )
-                img = await gen_thumb(videoid)
+                img = await get_thumb(videoid)
                 button = stream_markup(_, chat_id)
                 run = await app.send_photo(
                     chat_id=original_chat_id,
@@ -434,7 +446,7 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_6"],
                     )
-                img = await gen_thumb(videoid)
+                img = await get_thumb(videoid)
                 button = stream_markup(_, chat_id)
                 await mystic.delete()
                 run = await app.send_photo(
@@ -522,7 +534,7 @@ class Call(PyTgCalls):
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 else:
-                    img = await gen_thumb(videoid)
+                    img = await get_thumb(videoid)
                     button = stream_markup(_, chat_id)
                     run = await app.send_photo(
                         chat_id=original_chat_id,
