@@ -232,7 +232,7 @@ async def get_thumb(videoid: str):
         draw_text_with_shadow(background, draw, (text_x_position, 400), "00:00", arial, (255, 255, 255))
         draw_text_with_shadow(background, draw, (1080, 400), duration, arial, (255, 255, 255))
         
-        play_icons = Image.open("SHUKLAMUSIC/assets/play_icons.png")
+        play_icons = Image.open("SHUKLAMUSIC/assests/assets/play_icons.png")
         play_icons = play_icons.resize((580, 62))
         background.paste(play_icons, (text_x_position, 450), play_icons)
 
