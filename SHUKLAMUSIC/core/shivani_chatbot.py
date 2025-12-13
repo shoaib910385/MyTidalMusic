@@ -1,92 +1,85 @@
 import os
-from pyrogram import Client, filters
+from pyrogram import filters
 from groq import Groq
 
-# ───── ENV ─────
 BOT_USERNAME = os.environ.get("BOT_USERNAME").lower()
-
-# ───── GROQ ─────
 groq = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-# ───── BLOCKED COMMANDS ─────
 BLOCKED_COMMANDS = (
     "/play", "/vplay", "/cplay", "/seek", "/seekback",
     "/pause", "/resume", "/skip", "/end", "/stop",
     "/afk", "/ping", "/start", "/help"
 )
 
-# ───── SYSTEM PROMPT (PERSONALITY) ─────
 SYSTEM_PROMPT = """
 Your name is Shivani.
-You are a funny, caring, friendly bestfriend.
-You talk like a real human, not an AI.
-You use emojis naturally 😄✨
+You are a funny, caring, human-like bestfriend.
+You talk casually with emotions and emojis 😄✨
 Sometimes playful, sometimes supportive.
-Replies should be short, emotional and natural.
+Never say you are an AI.
+Keep replies short, natural and friendly.
 No images, only text.
 """
 
-# ───── MEMORY ─────
 USER_MEMORY = {}
 
-def add_memory(uid, role, content):
+def add_memory(uid, role, text):
     USER_MEMORY.setdefault(uid, []).append(
-        {"role": role, "content": content}
+        {"role": role, "content": text}
     )
     USER_MEMORY[uid] = USER_MEMORY[uid][-5:]
 
-# ───── HANDLER ─────
-@Client.on_message(filters.text & ~filters.command)
-async def shivani_chat(client, message):
-    text = message.text.strip()
+def setup_chatbot(app):
 
-    # Ignore blocked commands
-    if text.startswith(BLOCKED_COMMANDS):
-        return
+    @app.on_message(filters.text)
+    async def shivani_chat(client, message):
+        if not message.from_user:
+            return
 
-    # PRIVATE CHAT → always reply
-    if message.chat.type == "private":
-        triggered = True
-    else:
-        # GROUP → mention OR reply to bot
-        mentioned = message.entities and any(
-            e.type == "mention" and BOT_USERNAME in text.lower()
-            for e in message.entities
-        )
+        text = message.text.strip()
 
-        replied = (
-            message.reply_to_message
-            and message.reply_to_message.from_user
-            and message.reply_to_message.from_user.is_bot
-        )
+        # Ignore commands
+        if text.startswith(BLOCKED_COMMANDS):
+            return
 
-        triggered = mentioned or replied
+        # PRIVATE CHAT → always respond
+        if message.chat.type == "private":
+            triggered = True
+        else:
+            # GROUP CHAT
+            mentioned = f"@{BOT_USERNAME}" in text.lower()
 
-    if not triggered:
-        return
+            replied_to_bot = (
+                message.reply_to_message
+                and message.reply_to_message.from_user
+                and message.reply_to_message.from_user.is_bot
+            )
 
-    user_id = message.from_user.id
+            triggered = mentioned or replied_to_bot
 
-    # Clean mention
-    clean_text = text.replace(f"@{BOT_USERNAME}", "").strip()
+        if not triggered:
+            return
 
-    add_memory(user_id, "user", clean_text)
+        clean_text = text.replace(f"@{BOT_USERNAME}", "").strip()
+        user_id = message.from_user.id
 
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    messages.extend(USER_MEMORY[user_id])
+        add_memory(user_id, "user", clean_text)
 
-    try:
-        response = groq.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=messages,
-            temperature=0.9,
-            max_tokens=180
-        )
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        messages.extend(USER_MEMORY[user_id])
 
-        reply = response.choices[0].message.content.strip()
-        add_memory(user_id, "assistant", reply)
+        try:
+            response = groq.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=messages,
+                temperature=0.9,
+                max_tokens=180
+            )
 
-        await message.reply_text(reply)
+            reply = response.choices[0].message.content.strip()
+            add_memory(user_id, "assistant", reply)
 
-    except Exception:
-        await message.reply_text("😅 Arre ruk… thoda load aa gaya!")
+            await message.reply_text(reply)
+
+        except Exception as e:
+            await message.reply_text("😅 Arre wait na… thoda busy ho gayi!")
