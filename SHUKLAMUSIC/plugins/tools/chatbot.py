@@ -80,7 +80,7 @@ async def tidal_chat(bot, message):
     if message.chat.type == "private":
         triggered = dm_greeting_trigger(text) or message.from_user.id in USER_MEMORY
     else:
-        mentioned = f"{BOT_USERNAME}" in text.lower()
+        mentioned = f"@{BOT_USERNAME}" in text.lower()
 
         replied = (
             message.reply_to_message
@@ -97,7 +97,7 @@ async def tidal_chat(bot, message):
 
     # Clean message
     clean_text = (
-        text.replace(f"tidalxmusicbot", "")
+        text.replace(f"@tidalxmusicbot", "")
             .replace(BOT_NAME, "")
             .strip()
     )
