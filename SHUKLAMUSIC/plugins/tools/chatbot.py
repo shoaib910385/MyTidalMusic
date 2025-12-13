@@ -7,7 +7,7 @@ import re
 
 # ─── CONFIG ──────────────────────────────────────────
 BOT_USERNAME = getenv("BOT_USERNAME", "").lower()
-BOT_NAME = "Tidal"  # name trigger (lowercase)
+BOT_NAME = "tidal"  # name trigger (lowercase)
 
 groq = Groq(api_key=getenv("GROQ_API_KEY"))
 
@@ -44,15 +44,15 @@ def name_trigger(text: str) -> bool:
     """
     Triggers if message starts with or contains bot name
     Examples:
-    'sivix hi'
-    'hey sivix'
+    'Tidal hi'
+    'hey Tidal'
     """
     text = text.lower()
     return bool(re.search(rf"\b{BOT_NAME}\b", text))
 
 # ─── CHAT HANDLER ────────────────────────────────────
 @app.on_message(filters.text)
-async def sivix_chat(bot, message):
+async def Tidal_chat(bot, message):
     if not message.from_user:
         return
 
