@@ -13,7 +13,7 @@ OWNER_USERNAME = "@hehe_stalker"
 groq = Groq(api_key=getenv("GROQ_API_KEY"))
 
 BLOCKED_COMMANDS = (
-    "/play", "/vplay", "/cplay", "/seek", "/seekback",
+    "/play", "/vplay", "/new","/grab","/harem","/cplay", "/seek", "/seekback",
     "/pause", "/resume", "/skip", "/end", "/stop",
     "/afk", "/ping", "/start", "/help"
 )
