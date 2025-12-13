@@ -1,5 +1,10 @@
 from pyrogram import Client, errors
 from pyrogram.enums import ChatMemberStatus, ParseMode
+from shivani_chatbot import setup_chatbot
+
+setup_chatbot(app)
+
+app.run()
 
 import config
 
