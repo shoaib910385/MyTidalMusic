@@ -4,11 +4,10 @@ from pyrogram.enums import ChatAction
 from groq import Groq
 from os import getenv
 import re
-import random
 
 # ─── CONFIG ──────────────────────────────────────────
-BOT_USERNAME = getenv("BOT_USERNAME", "").lower()      # tidalxmusicbot
-BOT_NAME = "tidal"
+BOT_USERNAME = getenv("BOT_USERNAME", "").lower()
+BOT_NAME = "tidal"  # name trigger (lowercase)
 OWNER_USERNAME = "@hehe_stalker"
 
 groq = Groq(api_key=getenv("GROQ_API_KEY"))
@@ -19,46 +18,33 @@ BLOCKED_COMMANDS = (
     "/afk", "/ping", "/start", "/help"
 )
 
-# ─── STICKERS (SAFE HUMAN-LIKE SET) ──────────────────
-STICKERS = [
-    "CAACAgUAAxkBAAIBRmZx1xPzH4uYxjF5l9fJZ2J5AAIJAAPGQX0KqQzQYg4KpDAE",
-    "CAACAgUAAxkBAAIBR2Zx1yG5Y9aFhZtZ3s4ZAAKpAAPGQX0KZ3Lw0wZBHTAE",
-    "CAACAgUAAxkBAAIBSGZx1z7Qk2UoA0HqFjQAAfH8AALuAAPGQX0K6t1ZqzEwzjAE"
-]
-
-def maybe_send_sticker(bot, message):
-    # 20% chance
-    if random.randint(1, 100) <= 20:
-        return bot.send_sticker(
-            chat_id=message.chat.id,
-            sticker=random.choice(STICKERS)
-        )
-    return None
-
-# ─── STRONG SYSTEM PROMPT ────────────────────────────
+# ─── STRONG SYSTEM PROMPT (HINGLISH + MOODS) ─────────
 SYSTEM_PROMPT = f"""
 Your name is Tidal.
-You talk ONLY in Hinglish.
-You behave like a real human bestfriend — not an AI.
+You talk ONLY in Hinglish (Hindi + English mix).
+You are NOT an AI. You are a real human bestfriend vibe.
 
-Vibe:
-- Mood swings 😵‍💫
-- Sometimes caring, sometimes attitude 😏
+Personality:
+- Mood swings like a real person 😵‍💫
+- Sometimes caring and soft
+- Sometimes attitude wali 😏
 - Sometimes savage but playful
-- Sometimes lovely 🫶
+- Sometimes lovely and supportive 💗
 
-Rules:
-- Short replies (1–2 lines)
-- Use words like: hein?, acha?, uff, arre yaar, hmm
-- Emojis naturally
-- Never explain like a bot
-- Never say you are AI
+Style rules:
+- Replies must be SHORT (1–2 lines max)
+- Use natural fillers like: hein?, acha?, huh 😵‍💫, arre yaar, uff, hmm, lol
+- Use emojis naturally (not too many)
+- Sound casual, desi, real
+- NEVER explain things like an assistant
+- NEVER say you are a bot or AI
+- No images, only text
 
 Owner:
-- Owner is {OWNER_USERNAME}
-- Be slightly soft and respectful with owner
+- Your owner is @hehe_stalker
+- Be respectful and slightly soft when owner talks
 
-No images. Text only (stickers allowed occasionally).
+You behave like a real friend chatting on Telegram.
 """
 
 # ─── MEMORY ──────────────────────────────────────────
@@ -70,14 +56,12 @@ def add_memory(uid, role, text):
     )
     USER_MEMORY[uid] = USER_MEMORY[uid][-6:]
 
-# ─── TRIGGER HELPERS (STRICT) ────────────────────────
-def exact_username_trigger(text: str) -> bool:
-    return f"@{BOT_USERNAME}" in text.lower()
+# ─── TRIGGER HELPERS ─────────────────────────────────
+def name_trigger(text: str) -> bool:
+    text = text.lower()
+    return bool(re.search(rf"\b{BOT_NAME}\b", text))
 
-def exact_name_trigger(text: str) -> bool:
-    return bool(re.search(rf"\b{BOT_NAME}\b", text.lower()))
-
-def dm_greeting(text: str) -> bool:
+def dm_greeting_trigger(text: str) -> bool:
     return text.lower() in ("hi", "hello", "hey")
 
 # ─── CHAT HANDLER ────────────────────────────────────
@@ -94,24 +78,26 @@ async def tidal_chat(bot, message):
 
     # ─── TRIGGER LOGIC ───
     if message.chat.type == "private":
-        triggered = dm_greeting(text) or message.from_user.id in USER_MEMORY
+        triggered = dm_greeting_trigger(text) or message.from_user.id in USER_MEMORY
     else:
-        triggered = (
-            exact_username_trigger(text)
-            or exact_name_trigger(text)
-            or (
-                message.reply_to_message
-                and message.reply_to_message.from_user
-                and message.reply_to_message.from_user.is_bot
-            )
+        mentioned = f"@{BOT_USERNAME}" in text.lower()
+
+        replied = (
+            message.reply_to_message
+            and message.reply_to_message.from_user
+            and message.reply_to_message.from_user.is_bot
         )
+
+        name_called = name_trigger(text)
+
+        triggered = mentioned or replied or name_called
 
     if not triggered:
         return
 
-    # Clean text
+    # Clean message
     clean_text = (
-        text.replace(f"@{BOT_USERNAME}", "")
+        text.replace(f"@tidalxmusicbot", "")
             .replace(BOT_NAME, "")
             .strip()
     )
@@ -128,8 +114,8 @@ async def tidal_chat(bot, message):
         response = groq.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=messages,
-            temperature=1.0,
-            max_tokens=150
+            temperature=1.0,   # more mood swings
+            max_tokens=160
         )
 
         reply = response.choices[0].message.content.strip()
@@ -137,10 +123,7 @@ async def tidal_chat(bot, message):
 
         await message.reply_text(reply)
 
-        # Maybe send sticker
-        await maybe_send_sticker(bot, message)
-
     except Exception:
         await message.reply_text(
-            "uff 😵‍💫 dimag thoda hang ho gaya… phir bolo na"
+            "uff 😵‍💫 thoda dimag hang ho gaya… phir bolo na"
         )
