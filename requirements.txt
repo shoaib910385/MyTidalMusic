@@ -18,6 +18,8 @@ Faker
 gitpython
 gpytranslate
 gtts
+groq
+tgcrypto
 hachoir
 heroku3
 httpx
@@ -55,7 +57,6 @@ speedtest-cli
 SpeechRecognition
 spotipy
 telegraph
-tgcrypto
 unidecode
 wget
 yt-dlp
