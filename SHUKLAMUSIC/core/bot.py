@@ -4,7 +4,6 @@ from pyrogram.enums import ChatMemberStatus, ParseMode
 import config
 
 from ..logging import LOGGER
-import shivani_chatbot
 
 class SHUKLA(Client):
     def __init__(self):
