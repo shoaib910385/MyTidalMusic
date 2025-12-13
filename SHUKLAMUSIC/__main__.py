@@ -3,11 +3,6 @@ import importlib
 
 from pyrogram import idle
 from pytgcalls.exceptions import NoActiveGroupCall
-from shivani_chatbot import setup_chatbot
-
-setup_chatbot(app)
-
-app.run()
 
 import config
 from SHUKLAMUSIC import LOGGER, app, userbot
