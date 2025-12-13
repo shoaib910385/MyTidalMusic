@@ -8,6 +8,7 @@ import re
 # ─── CONFIG ──────────────────────────────────────────
 BOT_USERNAME = getenv("BOT_USERNAME", "").lower()
 BOT_NAME = "tidal"  # name trigger (lowercase)
+OWNER_USERNAME = "@hehe_stalker"
 
 groq = Groq(api_key=getenv("GROQ_API_KEY"))
 
@@ -17,17 +18,33 @@ BLOCKED_COMMANDS = (
     "/afk", "/ping", "/start", "/help"
 )
 
-# ─── PERSONALITY (HINGLISH) ──────────────────────────
-SYSTEM_PROMPT = """
+# ─── STRONG SYSTEM PROMPT (HINGLISH + MOODS) ─────────
+SYSTEM_PROMPT = f"""
 Your name is Tidal.
-You talk in Hinglish (Hindi + English mix).
-You are a caring, funny, human-like bestfriend.
-Use emojis naturally 😄✨
-Sometimes tease, sometimes support.
-Talk casually like real Indian friends.
-Never say you are an AI or bot.
-Replies should feel real, short, and friendly.
-No images, text only.
+You talk ONLY in Hinglish (Hindi + English mix).
+You are NOT an AI. You are a real human bestfriend vibe.
+
+Personality:
+- Mood swings like a real person 😵‍💫
+- Sometimes caring and soft
+- Sometimes attitude wali 😏
+- Sometimes savage but playful
+- Sometimes lovely and supportive 💗
+
+Style rules:
+- Replies must be SHORT (1–2 lines max)
+- Use natural fillers like: hein?, acha?, huh 😵‍💫, arre yaar, uff, hmm, lol
+- Use emojis naturally (not too many)
+- Sound casual, desi, real
+- NEVER explain things like an assistant
+- NEVER say you are a bot or AI
+- No images, only text
+
+Owner:
+- Your owner is {OWNER_USERNAME}
+- Be respectful and slightly soft when owner talks
+
+You behave like a real friend chatting on Telegram.
 """
 
 # ─── MEMORY ──────────────────────────────────────────
@@ -41,18 +58,15 @@ def add_memory(uid, role, text):
 
 # ─── TRIGGER HELPERS ─────────────────────────────────
 def name_trigger(text: str) -> bool:
-    """
-    Triggers if message starts with or contains bot name
-    Examples:
-    'Tidal hi'
-    'hey Tidal'
-    """
     text = text.lower()
     return bool(re.search(rf"\b{BOT_NAME}\b", text))
 
+def dm_greeting_trigger(text: str) -> bool:
+    return text.lower() in ("hi", "hello", "hey")
+
 # ─── CHAT HANDLER ────────────────────────────────────
 @app.on_message(filters.text)
-async def Tidal_chat(bot, message):
+async def tidal_chat(bot, message):
     if not message.from_user:
         return
 
@@ -64,8 +78,7 @@ async def Tidal_chat(bot, message):
 
     # ─── TRIGGER LOGIC ───
     if message.chat.type == "private":
-        triggered = True
-
+        triggered = dm_greeting_trigger(text) or message.from_user.id in USER_MEMORY
     else:
         mentioned = f"@{BOT_USERNAME}" in text.lower()
 
@@ -82,7 +95,7 @@ async def Tidal_chat(bot, message):
     if not triggered:
         return
 
-    # Clean message text
+    # Clean message
     clean_text = (
         text.replace(f"@{BOT_USERNAME}", "")
             .replace(BOT_NAME, "")
@@ -90,8 +103,7 @@ async def Tidal_chat(bot, message):
     )
 
     user_id = message.from_user.id
-
-    add_memory(user_id, "user", clean_text or "Hi")
+    add_memory(user_id, "user", clean_text or "hi")
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     messages.extend(USER_MEMORY[user_id])
@@ -102,8 +114,8 @@ async def Tidal_chat(bot, message):
         response = groq.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=messages,
-            temperature=0.9,
-            max_tokens=220
+            temperature=1.0,   # more mood swings
+            max_tokens=160
         )
 
         reply = response.choices[0].message.content.strip()
@@ -113,5 +125,5 @@ async def Tidal_chat(bot, message):
 
     except Exception:
         await message.reply_text(
-            "😅 Arre wait yaar… thoda busy ho gayi thi, phir bolo na!"
-      )
+            "uff 😵‍💫 thoda dimag hang ho gaya… phir bolo na"
+        )
