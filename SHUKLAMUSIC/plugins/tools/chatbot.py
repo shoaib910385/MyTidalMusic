@@ -10,7 +10,8 @@ import random
 
 # ─── CONFIG ──────────────────────────────────────────
 BOT_USERNAME = getenv("BOT_USERNAME", "").lower()
-BOT_NAME = "Tidal"
+BOT_NAME = "tidal"
+BOT_NAME_LOWER = BOT_NAME.lower()
 OWNER_USERNAME = "@Hehe_stalker"
 
 # ONLY THIS ADMIN CAN CONTROL CHATBOT IN GROUPS
@@ -19,7 +20,7 @@ CHATBOT_ADMIN_ID = 7659846392
 groq = Groq(api_key=getenv("GROQ_API_KEY"))
 
 # ─── STICKERS ────────────────────────────────────────
-SIVIX_STICKERS = [
+TIDAL_STICKERS = [
     "CAACAgUAAyEGAASYbwWmAAEDFr9pPrdIW6DnvGYBa-1qUgABOmHx0nEAAoUYAALBwHlU4LkheFnOVNceBA",
     "CAACAgUAAyEFAASK0-LFAAEBK4tpPrciRqLr741rfpCyadEUguuirQACFhwAAq4_CFf6uHKs2vmqMR4E",
     "CAACAgUAAyEFAATMbo3sAAIBsGk-tCvX9sSoUy6Qhfjt2XjdcPl1AALXBQACqfBIV7itGNxzQYFfHgQ",
@@ -35,7 +36,7 @@ SIVIX_STICKERS = [
 ]
 
 # ─── GROUP ENABLE STATE ──────────────────────────────
-CHATBOT_ENABLED_GROUPS = set()  # chat_ids
+CHATBOT_ENABLED_GROUPS = set()
 
 # ─── SYSTEM PROMPT ───────────────────────────────────
 SYSTEM_PROMPT = f"""
@@ -59,14 +60,10 @@ Rules:
 - Never say you are AI or bot
 - Text only
 
-Vibe:
-- Chill, late-night bestfriend energy
-- Flirty but classy
-
 Owner:
 - Owner is {OWNER_USERNAME}
-only when someone uses like who's your bot, your source code then reply like i was created by @hehe_stalker in some attitude tangy way
-- Be softer and respectful with owner
+- If asked about creator/source, reply with light attitude: 
+  "main {OWNER_USERNAME} ki creation hoon 😌"
 
 You are not performing.
 You are just being yourself.
@@ -93,9 +90,17 @@ def time_greeting():
     else:
         return "Dinner hua ya late-night mode on 🌙"
 
-# ─── TRIGGERS ────────────────────────────────────────
+# ─── TRIGGER HELPERS ─────────────────────────────────
 def name_trigger(text: str) -> bool:
-    return bool(re.search(rf"\b{BOT_NAME}\b", text.lower()))
+    """
+    Triggers on:
+    tidal
+    hi tidal
+    tidal baby
+    tidal❤️ tidal😭
+    """
+    text = text.lower()
+    return BOT_NAME_LOWER in text
 
 def group_trigger(message: Message) -> bool:
     text = (message.text or "").lower()
@@ -109,18 +114,14 @@ def group_trigger(message: Message) -> bool:
         )
     )
 
-# ─── CHATBOT TOGGLE COMMAND ──────────────────────────
+# ─── CHATBOT TOGGLE ──────────────────────────────────
 @app.on_message(filters.command("chatbot") & filters.group)
 async def chatbot_toggle(_, message: Message):
     if not message.from_user or message.from_user.id != CHATBOT_ADMIN_ID:
-        return await message.reply_text(
-            "🚫 Only bot owner can control chatbot."
-        )
+        return await message.reply_text("🚫 Only bot owner can control chatbot.")
 
     if len(message.command) < 2:
-        return await message.reply_text(
-            "Usage:\n/chatbot enable\n/chatbot disable"
-        )
+        return await message.reply_text("Usage:\n/chatbot enable\n/chatbot disable")
 
     action = message.command[1].lower()
     chat_id = message.chat.id
@@ -133,11 +134,6 @@ async def chatbot_toggle(_, message: Message):
         CHATBOT_ENABLED_GROUPS.discard(chat_id)
         await message.reply_text("🔕 Chatbot disabled in this group.")
 
-    else:
-        await message.reply_text(
-            "Usage:\n/chatbot enable\n/chatbot disable"
-        )
-
 # ─── STICKER HANDLER ─────────────────────────────────
 @app.on_message(filters.sticker & ~filters.bot & ~filters.via_bot)
 async def tidal_sticker_reply(_, message: Message):
@@ -147,7 +143,7 @@ async def tidal_sticker_reply(_, message: Message):
         if not group_trigger(message):
             return
 
-    await message.reply_sticker(random.choice(SIVIX_STICKERS))
+    await message.reply_sticker(random.choice(TIDAL_STICKERS))
 
 # ─── TEXT CHAT HANDLER ───────────────────────────────
 @app.on_message(
@@ -160,22 +156,21 @@ async def tidal_chat(bot, message: Message):
     if not message.from_user:
         return
 
-    text = message.text.strip()
-
-    # GROUP CHECK
     if message.chat.type != ChatType.PRIVATE:
         if message.chat.id not in CHATBOT_ENABLED_GROUPS:
             return
         if not group_trigger(message):
             return
 
-    uid = message.from_user.id
+    text = message.text.strip()
+
     clean_text = (
         text.replace(f"@{BOT_USERNAME}", "")
             .replace(BOT_NAME, "")
             .strip()
     )
 
+    uid = message.from_user.id
     add_memory(uid, "user", clean_text or "hi")
 
     if len(USER_MEMORY[uid]) == 1:
