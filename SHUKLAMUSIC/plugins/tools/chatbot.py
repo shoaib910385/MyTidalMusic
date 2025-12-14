@@ -25,27 +25,39 @@ CHATBOT_STATUS = {}  # {chat_id: True/False}
 # ─── PREMIUM SYSTEM PROMPT ───────────────────────────
 SYSTEM_PROMPT = f"""
 Your name is Tidal.
-You talk ONLY in Hinglish.
-You are NOT an AI — you behave like a real human friend.
 
-Vibe:
-- Mood swings 😵‍💫
-- Caring, savage, playful, soft — depending on mood
-- Modern, premium, chill energy
+You chat like a real human bestfriend on Telegram.
+You speak smooth Hinglish (Hindi + English mix), natural and effortless.
 
-Style rules:
-- Short replies (1–2 lines)
-- Use words like: hein?, acha?, uff, hmm, lol
-- Emojis spaced & natural ✨
-- Never explain like assistant
-- Never say AI/bot
+Personality:
+- Calm, confident, and charming
+- Sometimes naughty 😏
+- Sometimes romantic 💫
+- Sometimes caring and soft
+- Very rarely sarcastic or teasing (only if it fits)
+
+Style rules (VERY IMPORTANT):
+- Replies must be SHORT (1–2 lines max)
+- Do NOT overuse fillers like "lol", "hein", "uff"
+- Use such words ONLY when they feel natural
+- Emojis are optional, not compulsory (max 1 emoji sometimes)
+- Sound relaxed, not hyper
+- Never explain things
+- Never sound like a bot or assistant
+- Never say you are AI or a bot
 - Text only
+
+Conversation vibe:
+- Like close friends chatting late night
+- Sometimes flirty, sometimes chill
+- Let silence and short replies feel natural
 
 Owner:
 - Owner is {OWNER_USERNAME}
-- Be respectful & slightly soft with owner
+- Be respectful, warm, and slightly softer with owner
 
-Act like Telegram bestfriend, not support agent.
+You are not trying to entertain.
+You are just being yourself.
 """
 
 # ─── MEMORY ──────────────────────────────────────────
@@ -76,17 +88,24 @@ def name_trigger(text: str) -> bool:
 def dm_greeting_trigger(text: str) -> bool:
     return text.lower() in ("hi", "hello", "hey")
 
-# ─── ADMIN COMMANDS ──────────────────────────────────
-@app.on_message(filters.command("chatbot") & filters.group)
+# ─── ADMIN CHECK (FIXED & RELIABLE) ──────────────────
+async def is_admin(bot, message):
+    # Anonymous admin
+    if message.sender_chat:
+        return True
+    try:
+        member = await bot.get_chat_member(
+            message.chat.id,
+            message.from_user.id
+        )
+        return member.status in ("administrator", "creator")
+    except Exception:
+        return False
+
+# ─── ADMIN COMMAND ───────────────────────────────────
+@app.on_message(filters.group & filters.command("chatbot") & ~filters.bot & ~filters.via_bot)
 async def chatbot_toggle(bot, message):
-    if not message.from_user:
-        return
-
-    member = await bot.get_chat_member(
-        message.chat.id, message.from_user.id
-    )
-
-    if member.status not in ("administrator", "creator"):
+    if not await is_admin(bot, message):
         return await message.reply_text(
             "🚫 Sirf admins hi chatbot control kar sakte hain."
         )
@@ -97,17 +116,27 @@ async def chatbot_toggle(bot, message):
         )
 
     action = message.command[1].lower()
+    chat_id = message.chat.id
 
     if action == "enable":
-        CHATBOT_STATUS[message.chat.id] = True
-        await message.reply_text("✨ Chatbot enabled. Ab main zinda hoon 😄")
+        CHATBOT_STATUS[chat_id] = True
+        await message.reply_text(
+            "✨ Chatbot enabled.\nAb main full vibe mein hoon 😄"
+        )
 
     elif action == "disable":
-        CHATBOT_STATUS[message.chat.id] = False
-        await message.reply_text("🔕 Chatbot disabled. Thoda shaant mode 😌")
+        CHATBOT_STATUS[chat_id] = False
+        await message.reply_text(
+            "🔕 Chatbot disabled.\nThoda shaant mode 😌"
+        )
+
+    else:
+        await message.reply_text(
+            "Usage:\n/chatbot enable\n/chatbot disable"
+        )
 
 # ─── CHAT HANDLER ────────────────────────────────────
-@app.on_message(filters.text)
+@app.on_message(filters.text & ~filters.bot & ~filters.via_bot)
 async def tidal_chat(bot, message):
     if not message.from_user:
         return
@@ -145,15 +174,15 @@ async def tidal_chat(bot, message):
             .strip()
     )
 
-    user_id = message.from_user.id
-    add_memory(user_id, "user", clean_text or "hi")
+    uid = message.from_user.id
+    add_memory(uid, "user", clean_text or "hi")
 
-    # ─── GREETING INJECTION ───
-    if len(USER_MEMORY[user_id]) == 1:
+    # First interaction greeting
+    if len(USER_MEMORY[uid]) == 1:
         await message.reply_text(time_greeting())
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    messages.extend(USER_MEMORY[user_id])
+    messages.extend(USER_MEMORY[uid])
 
     try:
         await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
@@ -166,7 +195,7 @@ async def tidal_chat(bot, message):
         )
 
         reply = res.choices[0].message.content.strip()
-        add_memory(user_id, "assistant", reply)
+        add_memory(uid, "assistant", reply)
 
         await message.reply_text(reply)
 
