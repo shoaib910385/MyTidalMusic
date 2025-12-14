@@ -20,14 +20,11 @@ BLOCKED_COMMANDS = (
     "/afk", "/ping", "/start", "/help"
 )
 
-# ─── GROUP CHATBOT STATE (IN-MEMORY) ─────────────────
-CHATBOT_STATUS = {}  # {chat_id: bool}
-
 # ─── SYSTEM PROMPT (SMOOTH & HUMAN) ──────────────────
 SYSTEM_PROMPT = f"""
-Your name is Tidal. you're a girl
+Your name is Tidal. You are a girl.
 
-You talk like a real human bestfriend on Telegram.
+You chat like a real human bestfriend on Telegram.
 Your Hinglish is smooth, calm, and natural.
 
 Personality:
@@ -40,7 +37,7 @@ Personality:
 Rules:
 - Short replies (1–2 lines)
 - No filler spam
-- Emojis optional, max 1 sometimes
+- Emojis optional (max 1 sometimes)
 - Never explain
 - Never say you are AI or bot
 - Text only
@@ -80,61 +77,11 @@ def time_greeting():
 
 # ─── TRIGGERS ────────────────────────────────────────
 def name_trigger(text: str) -> bool:
+    # matches: tidal, hi tidal, tidal baby, etc.
     return bool(re.search(rf"\b{BOT_NAME}\b", text.lower()))
 
 def dm_greeting(text: str) -> bool:
     return text.lower() in ("hi", "hello", "hey")
-
-# ─── ADMIN CHECK (SAFE & VC-FREE) ────────────────────
-async def is_admin(bot, message: Message) -> bool:
-    # anonymous admin
-    if message.sender_chat:
-        return True
-
-    if not message.from_user:
-        return False
-
-    try:
-        member = await bot.get_chat_member(
-            message.chat.id,
-            message.from_user.id
-        )
-        return member.status in ("administrator", "creator")
-    except Exception:
-        return False
-
-# ─── CHATBOT ADMIN COMMAND ───────────────────────────
-@app.on_message(filters.group & filters.command("chatbot") & ~filters.bot & ~filters.via_bot)
-async def chatbot_toggle(bot, message: Message):
-    if not await is_admin(bot, message):
-        return await message.reply_text(
-            "🚫 Sirf admins hi chatbot control kar sakte hain."
-        )
-
-    if len(message.command) < 2:
-        return await message.reply_text(
-            "Usage:\n/chatbot enable\n/chatbot disable"
-        )
-
-    action = message.command[1].lower()
-    chat_id = message.chat.id
-
-    if action == "enable":
-        CHATBOT_STATUS[chat_id] = True
-        await message.reply_text(
-            "✨ Chatbot enabled.\nAb main yahin hoon."
-        )
-
-    elif action == "disable":
-        CHATBOT_STATUS[chat_id] = False
-        await message.reply_text(
-            "🔕 Chatbot disabled.\nThoda shaant rehne do."
-        )
-
-    else:
-        await message.reply_text(
-            "Usage:\n/chatbot enable\n/chatbot disable"
-        )
 
 # ─── CHAT HANDLER ────────────────────────────────────
 @app.on_message(filters.text & ~filters.bot & ~filters.via_bot)
@@ -144,13 +91,9 @@ async def tidal_chat(bot, message: Message):
 
     text = message.text.strip()
 
+    # Ignore music/system commands
     if text.startswith(BLOCKED_COMMANDS):
         return
-
-    # ─── GROUP ENABLE CHECK ───
-    if message.chat.type != ChatType.PRIVATE:
-        if not CHATBOT_STATUS.get(message.chat.id, False):
-            return
 
     # ─── TRIGGER LOGIC ───
     if message.chat.type == ChatType.PRIVATE:
@@ -169,6 +112,7 @@ async def tidal_chat(bot, message: Message):
     if not triggered:
         return
 
+    # Clean input text
     clean_text = (
         text.replace(f"@{BOT_USERNAME}", "")
             .replace(BOT_NAME, "")
@@ -178,6 +122,7 @@ async def tidal_chat(bot, message: Message):
     uid = message.from_user.id
     add_memory(uid, "user", clean_text or "hi")
 
+    # First interaction greeting
     if len(USER_MEMORY[uid]) == 1:
         await message.reply_text(time_greeting())
 
@@ -185,7 +130,10 @@ async def tidal_chat(bot, message: Message):
     messages.extend(USER_MEMORY[uid])
 
     try:
-        await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+        await bot.send_chat_action(
+            message.chat.id,
+            ChatAction.TYPING
+        )
 
         res = groq.chat.completions.create(
             model="llama-3.3-70b-versatile",
