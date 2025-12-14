@@ -7,8 +7,6 @@ from os import getenv
 import re
 from datetime import datetime
 
-from SHUKLAMUSIC.utils.decorators import AdminRightsCheck
-
 # ─── CONFIG ──────────────────────────────────────────
 BOT_USERNAME = getenv("BOT_USERNAME", "").lower()
 BOT_NAME = "tidal"
@@ -25,38 +23,37 @@ BLOCKED_COMMANDS = (
 # ─── GROUP CHATBOT STATE (IN-MEMORY) ─────────────────
 CHATBOT_STATUS = {}  # {chat_id: bool}
 
-# ─── SYSTEM PROMPT (REFINED & HUMAN) ─────────────────
+# ─── SYSTEM PROMPT (SMOOTH & HUMAN) ──────────────────
 SYSTEM_PROMPT = f"""
-Your name is Tidal.
+Your name is Tidal. you're a girl
 
-You chat like a real human bestfriend on Telegram.
-You speak smooth Hinglish — calm, natural, effortless.
+You talk like a real human bestfriend on Telegram.
+Your Hinglish is smooth, calm, and natural.
 
 Personality:
 - Confident, relaxed
 - Sometimes naughty 😏
 - Sometimes romantic 💫
-- Sometimes caring and soft
-- Rare sarcasm, only if it fits
+- Sometimes caring
+- Rare sarcasm, only when it fits
 
 Rules:
-- Replies SHORT (1–2 lines)
-- No filler spam (lol, hein, uff only if natural)
-- Emojis optional (max 1 sometimes)
+- Short replies (1–2 lines)
+- No filler spam
+- Emojis optional, max 1 sometimes
 - Never explain
-- Never sound like assistant
-- Never say AI or bot
+- Never say you are AI or bot
 - Text only
 
 Vibe:
-- Late-night bestfriend energy
-- Chill, flirty, human
+- Chill, late-night bestfriend energy
+- Flirty but classy
 
 Owner:
 - Owner is {OWNER_USERNAME}
-- Be respectful and warmer with owner
+- Be softer and respectful with owner
 
-You are not trying to entertain.
+You are not performing.
 You are just being yourself.
 """
 
@@ -75,11 +72,11 @@ def time_greeting():
     if 5 <= hour < 12:
         return "Good morning ☀️ chai pi?"
     elif 12 <= hour < 17:
-        return "Lunch hua? thoda break bhi le lo"
+        return "Lunch hua? thoda break le lo"
     elif 17 <= hour < 21:
-        return "Shaam wali vibe ✨ kya chal raha hai"
+        return "Shaam vibes ✨ kya chal raha"
     else:
-        return "Dinner hua ya late night mode on 🌙"
+        return "Dinner hua ya late-night mode on 🌙"
 
 # ─── TRIGGERS ────────────────────────────────────────
 def name_trigger(text: str) -> bool:
@@ -88,16 +85,39 @@ def name_trigger(text: str) -> bool:
 def dm_greeting(text: str) -> bool:
     return text.lower() in ("hi", "hello", "hey")
 
-# ─── CHATBOT ADMIN COMMAND (PROJECT-NATIVE) ──────────
-@app.on_message(filters.command("chatbot") & filters.group)
-@AdminRightsCheck
-async def chatbot_toggle(_, message: Message, __, chat_id):
+# ─── ADMIN CHECK (SAFE & VC-FREE) ────────────────────
+async def is_admin(bot, message: Message) -> bool:
+    # anonymous admin
+    if message.sender_chat:
+        return True
+
+    if not message.from_user:
+        return False
+
+    try:
+        member = await bot.get_chat_member(
+            message.chat.id,
+            message.from_user.id
+        )
+        return member.status in ("administrator", "creator")
+    except Exception:
+        return False
+
+# ─── CHATBOT ADMIN COMMAND ───────────────────────────
+@app.on_message(filters.group & filters.command("chatbot") & ~filters.bot & ~filters.via_bot)
+async def chatbot_toggle(bot, message: Message):
+    if not await is_admin(bot, message):
+        return await message.reply_text(
+            "🚫 Sirf admins hi chatbot control kar sakte hain."
+        )
+
     if len(message.command) < 2:
         return await message.reply_text(
             "Usage:\n/chatbot enable\n/chatbot disable"
         )
 
     action = message.command[1].lower()
+    chat_id = message.chat.id
 
     if action == "enable":
         CHATBOT_STATUS[chat_id] = True
