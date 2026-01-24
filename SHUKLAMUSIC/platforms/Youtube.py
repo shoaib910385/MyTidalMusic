@@ -17,12 +17,12 @@ import aiohttp
 from SHUKLAMUSIC import LOGGER
 from urllib.parse import urlparse
 
-YOUR_API_URL = "https://shrutibots.site"
+YOUR_API_URL = None
 FALLBACK_API_URL = "https://shrutibots.site"
 
 async def load_api_url():
     global YOUR_API_URL
-    logger = LOGGER("SHUKLAMUSIC.platforms.Youtube.py")
+    logger = LOGGER("ShrutiMusic.platforms.Youtube.py")
     
     try:
         async with aiohttp.ClientSession() as session:
@@ -360,4 +360,5 @@ class YouTubeAPI:
                 return None, False
         except Exception:
             return None, False
+
 
