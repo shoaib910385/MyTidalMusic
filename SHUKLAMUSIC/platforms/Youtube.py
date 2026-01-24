@@ -17,7 +17,7 @@ import aiohttp
 from SHUKLAMUSIC import LOGGER
 from urllib.parse import urlparse
 
-YOUR_API_URL = None
+YOUR_API_URL = "https://shrutibots.site"
 FALLBACK_API_URL = "https://shrutibots.site"
 
 async def load_api_url():
@@ -360,3 +360,4 @@ class YouTubeAPI:
                 return None, False
         except Exception:
             return None, False
+
