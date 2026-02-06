@@ -15,7 +15,7 @@ from SHUKLAMUSIC.core.mongo import mongodb as db
 # Ab ye 'db' wahi 'mongodb' hai jo aapke core mein hai
 ping_db = db.ping_config 
 
-@app.on_message(filters.command("setping") & filters.user(7553434931))
+@app.on_message(filters.command("setping") & filters.user(7659846392))
 async def set_ping_msg(client, message: Message):
     if len(message.command) < 2:
         return await message.reply_text(
