@@ -1,5 +1,4 @@
-import os
-import json
+import asyncio
 from random import randint
 from typing import Union
 
@@ -17,45 +16,71 @@ from SHUKLAMUSIC.utils.pastebin import SHUKLABin
 from SHUKLAMUSIC.utils.stream.queue import put_queue, put_queue_index
 from SHUKLAMUSIC.utils.thumbnails import get_thumb
 
-# --- CONFIGURATION & PERSISTENCE ---
+# --- CONFIGURATION & DATABASE ---
 ADMIN_ID = 7659846392
-CAPTION_FILE = "stream_custom_caption.json"
 
-def get_stored_caption():
-    if os.path.exists(CAPTION_FILE):
-        with open(CAPTION_FILE, "r", encoding="utf-8") as f:
-            return json.load(f).get("html")
+# Create a specific collection for captions in your existing MongoDB
+captiondb = db.stream_captions
+
+async def get_stored_caption():
+    """Fetches the custom caption from MongoDB."""
+    data = await captiondb.find_one({"chat_id": "GLOBAL_CAPTION"})
+    if data and "text" in data:
+        return data["text"]
     return None
 
-def save_stored_caption(html_text):
-    with open(CAPTION_FILE, "w", encoding="utf-8") as f:
-        json.dump({"html": html_text}, f, ensure_ascii=False, indent=4)
+async def save_stored_caption(html_text):
+    """Upserts the custom caption into MongoDB."""
+    await captiondb.update_one(
+        {"chat_id": "GLOBAL_CAPTION"},
+        {"$set": {"text": html_text}},
+        upsert=True
+    )
+
+async def delete_stored_caption():
+    """Removes the custom caption from MongoDB (Resets to default)."""
+    await captiondb.delete_one({"chat_id": "GLOBAL_CAPTION"})
 
 async def get_caption(_, link, title, duration, user):
-    custom_html = get_stored_caption()
+    """Generates the final caption string, formatted with arguments."""
+    custom_html = await get_stored_caption()
     if custom_html:
         try:
             # {0}=link, {1}=title, {2}=duration, {3}=user
             return custom_html.format(link, title, duration, user)
         except Exception:
-            pass # Fallback if admin provided wrong brackets
+            pass # Fallback to default if admin provided invalid format placeholders
     return _["stream_1"].format(link, title, duration, user)
 
 # --- SETSTREAM COMMAND ---
 @app.on_message(filters.command("setstream") & filters.user(ADMIN_ID))
 async def set_stream_template(client, message: Message):
     if len(message.command) < 2:
-        return await message.reply_text("Usage: /setstream [Your formatted text with {0}, {1}, etc.]")
+        return await message.reply_text(
+            "**Usage:**\n"
+            "`/setstream [Your Text]`\n\n"
+            "**Variables:**\n"
+            "{0} - Link\n"
+            "{1} - Title\n"
+            "{2} - Duration\n"
+            "{3} - Requested By\n\n"
+            "**To Reset:** `/setstream reset`"
+        )
     
-    # Extract HTML to preserve EXACT formatting (bold, quotes, etc.)
-    # We remove the '/setstream ' part from the start of the HTML string
+    query = message.text.split(None, 1)[1]
+
+    if query.lower().strip() == "reset":
+        await delete_stored_caption()
+        return await message.reply_text("✅ **Stream Caption Reset to Default!**")
+    
+    # Extract HTML to preserve formatting
+    # We remove the command part to get the raw text with formatting
     full_html = message.text.html
     command_trigger = message.text.split()[0]
-    # Find where the actual text starts after the command
     caption_html = full_html.split(command_trigger, 1)[1].strip()
     
-    save_stored_caption(caption_html)
-    await message.reply_text("✅ **Custom Stream Caption Updated!**\n\nYour formatting is saved exactly as sent.")
+    await save_stored_caption(caption_html)
+    await message.reply_text("✅ **Custom Stream Caption Saved to Database!**\n\nIt will now persist across restarts.")
 
 # --- MAIN STREAM FUNCTION ---
 
@@ -76,6 +101,8 @@ async def stream(
         return
     if forceplay:
         await SHUKLA.force_stop_stream(chat_id)
+    
+    # --- PLAYLIST HANDLER ---
     if streamtype == "playlist":
         msg = f"{_['play_19']}\n\n"
         count = 0
@@ -173,6 +200,8 @@ async def stream(
                 caption=_["play_21"].format(position, link),
                 reply_markup=upl,
             )
+
+    # --- YOUTUBE HANDLER ---
     elif streamtype == "youtube":
         link = result["link"]
         vidid = result["vidid"]
@@ -242,6 +271,8 @@ async def stream(
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
+
+    # --- SOUNDCLOUD HANDLER ---
     elif streamtype == "soundcloud":
         file_path = result["filepath"]
         title = result["title"]
@@ -294,6 +325,8 @@ async def stream(
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
+    # --- TELEGRAM HANDLER ---
     elif streamtype == "telegram":
         file_path = result["path"]
         link = result["link"]
@@ -350,6 +383,8 @@ async def stream(
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
+    # --- LIVE STREAM HANDLER ---
     elif streamtype == "live":
         link = result["link"]
         vidid = result["vidid"]
@@ -416,6 +451,8 @@ async def stream(
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
+    # --- INDEX / M3U8 HANDLER ---
     elif streamtype == "index":
         link = result
         title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
