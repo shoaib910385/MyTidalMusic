@@ -5,7 +5,7 @@ from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from SHUKLAMUSIC import app
 
 
-@app.on_message(filters.command(["github", "git"]))
+@app.on_message(filters.command(["temdmkdjdbdndjskskdbbdbdvdvdv", "gnnnnnmdmdkdjdjdnejejeiejendbbdit"]))
 async def github(_, message: Message):
     if len(message.command) != 2:
         return await message.reply_text("**ᴜsᴀɢᴇ:** `/git <username>`")
