@@ -59,13 +59,13 @@ def stream_markup_timer(_, chat_id, played, dur):
     buttons = [
         [
             InlineKeyboardButton(text=" ˹ηєᴛᴡᴏʀᴋ˼ ", url="https://t.me/thedrxnet", style="success", "icon_custom_emoji_id": "5204046146955153467"), # Green
-            InlineKeyboardButton(text=" ˹ϻʏ ʜᴏϻє˼ ", url="https://t.me/drx_supportchat", style="primary"), # Blue
+            InlineKeyboardButton(text=" ˹ϻʏ ʜᴏϻє˼ ", url="https://t.me/drx_supportchat", style="primary", "icon_custom_emoji_id": "5424663180838182778"), # Blue
         ],
         [
-            InlineKeyboardButton("˹ᴘʀιᴠᴧᴄʏ˼", url=f"https://telegra.ph/Privacy-Policy-08-03-101", style="gray"), # Gray
-            InlineKeyboardButton("˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪", url=f"http://t.me/TidalXMusicBot/tidaltunes", style="warning"), # Orange
+            InlineKeyboardButton("˹ᴘʀιᴠᴧᴄʏ˼", url=f"https://telegra.ph/Privacy-Policy-08-03-101", style="gray", "icon_custom_emoji_id": "5409029744693897259"), # Gray
+            InlineKeyboardButton("˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪", url=f"http://t.me/TidalXMusicBot/tidaltunes", style="warning", "icon_custom_emoji_id": "6141008793179261507"), # Orange
         ],
-        [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close", style="destructive")], # Red
+        [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close", style="destructive", "icon_custom_emoji_id": "5224674827633175944")], # Red
     ]
     return buttons
 
