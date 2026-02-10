@@ -21,11 +21,14 @@ def start_panel(_, bot_username: str):
         InlineKeyboardButton(
             text="˹ᴘσʟιᴄʏ˼",
             url="https://telegra.ph/Privacy-Policy-08-03-101",
-            style="primary"
+            style="primary",
+            icon_custom_emoji_id="6141008793179261507"
         ),
         InlineKeyboardButton(
             text="˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
-            url="http://t.me/TidalXMusicBot/tidaltunes"
+            url="http://t.me/TidalXMusicBot/tidaltunes",
+            style="primary", 
+            icon_custom_emoji_id="5204046146955153467"
         ),
     )
 
