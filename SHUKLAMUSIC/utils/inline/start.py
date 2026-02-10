@@ -45,6 +45,7 @@ def private_panel(_):
                 url="http://t.me/TidalXMusicBot/tidaltunes"
             ),
         ],
+        [
         
             InlineKeyboardButton(
                 text=_["S_B_6"],
@@ -55,6 +56,7 @@ def private_panel(_):
                 url=config.SUPPORT_CHAT
             ),
         ],
+        [
     
             InlineKeyboardButton(
                 text=_["S_B_4"],
