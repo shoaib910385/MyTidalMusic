@@ -1,20 +1,15 @@
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton
 
 import config
 from SHUKLAMUSIC import app
-
 
 def start_panel(_):
     buttons = [
         [
             InlineKeyboardButton(
-                text=_["S_B_1"],
-                url=f"https://t.me/{app.username}?startgroup=true"
+                text=_["S_B_1"], url=f"https://t.me/{app.username}?startgroup=true"
             ),
-            InlineKeyboardButton(
-                text=_["S_B_2"],
-                url=config.SUPPORT_CHAT
-            ),
+            InlineKeyboardButton(text=_["S_B_2"], url=config.SUPPORT_CHAT),
         ],
         [
             InlineKeyboardButton(
@@ -26,8 +21,9 @@ def start_panel(_):
                 url="http://t.me/TidalXMusicBot/tidaltunes"
             ),
         ],
+        
     ]
-    return InlineKeyboardMarkup(buttons)
+    return buttons
 
 
 def private_panel(_):
@@ -35,9 +31,10 @@ def private_panel(_):
         [
             InlineKeyboardButton(
                 text=_["S_B_3"],
-                url=f"https://t.me/{app.username}?startgroup=true"
+                url=f"https://t.me/{app.username}?startgroup=true",
             )
         ],
+        
         [
             InlineKeyboardButton(
                 "˹ᴘʀιᴠᴧᴄʏ ᴘσʟιᴄʏ˼",
@@ -48,7 +45,7 @@ def private_panel(_):
                 url="http://t.me/TidalXMusicBot/tidaltunes"
             ),
         ],
-        [
+        
             InlineKeyboardButton(
                 text=_["S_B_6"],
                 url=config.SUPPORT_CHANNEL
@@ -58,7 +55,7 @@ def private_panel(_):
                 url=config.SUPPORT_CHAT
             ),
         ],
-        [
+    
             InlineKeyboardButton(
                 text=_["S_B_4"],
                 callback_data="settings_back_helper"
@@ -71,4 +68,6 @@ def private_panel(_):
             ),
         ],
     ]
-    return InlineKeyboardMarkup(buttons)
+    return buttons
+    
+    
