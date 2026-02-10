@@ -1,4 +1,5 @@
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 import config
 from SHUKLAMUSIC import app
 
@@ -17,16 +18,15 @@ def start_panel(_):
         ],
         [
             InlineKeyboardButton(
-                text="˹ᴘσʟιᴄʏ˼",
+                "˹ᴘσʟιᴄʏ˼",
                 url="https://telegra.ph/Privacy-Policy-08-03-101"
             ),
             InlineKeyboardButton(
-                text="˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
+                "˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
                 url="http://t.me/TidalXMusicBot/tidaltunes"
             ),
         ],
     ]
-
     return InlineKeyboardMarkup(buttons)
 
 
@@ -40,11 +40,11 @@ def private_panel(_):
         ],
         [
             InlineKeyboardButton(
-                text="˹ᴘʀιᴠᴧᴄʏ ᴘσʟιᴄʏ˼",
+                "˹ᴘʀιᴠᴧᴄʏ ᴘσʟιᴄʏ˼",
                 url="https://telegra.ph/Privacy-Policy-08-03-101"
             ),
             InlineKeyboardButton(
-                text="˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
+                "˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
                 url="http://t.me/TidalXMusicBot/tidaltunes"
             ),
         ],
@@ -62,14 +62,13 @@ def private_panel(_):
             InlineKeyboardButton(
                 text=_["S_B_4"],
                 callback_data="settings_back_helper"
-            )
+            ),
         ],
         [
             InlineKeyboardButton(
                 text=_["S_B_5"],
                 url=f"https://t.me/{config.OWNER_USERNAME}"
-            )
+            ),
         ],
     ]
-
     return InlineKeyboardMarkup(buttons)
