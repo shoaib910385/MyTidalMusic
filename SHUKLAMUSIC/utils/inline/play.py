@@ -58,7 +58,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         
     buttons = [
         [
-            InlineKeyboardButton(text=" ˹ηєᴛᴡᴏʀᴋ˼ ", url="https://t.me/thedrxnet", style="success"), # Green
+            InlineKeyboardButton(text=" ˹ηєᴛᴡᴏʀᴋ˼ ", url="https://t.me/thedrxnet", style="success", "icon_custom_emoji_id": "5204046146955153467"), # Green
             InlineKeyboardButton(text=" ˹ϻʏ ʜᴏϻє˼ ", url="https://t.me/drx_supportchat", style="primary"), # Blue
         ],
         [
