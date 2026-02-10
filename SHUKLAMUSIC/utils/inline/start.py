@@ -3,13 +3,13 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import config
 
-def start_panel(_, bot_username: str):
+def start_panel(_):
     kb = InlineKeyboardBuilder()
 
     kb.row(
         InlineKeyboardButton(
             text=_["S_B_1"],
-            url=f"https://t.me/{bot_username}?startgroup=true"
+            url=f"https://t.me/tidalxmusicbot?startgroup=true"
         ),
         InlineKeyboardButton(
             text=_["S_B_2"],
@@ -41,7 +41,7 @@ def private_panel(_, bot_username: str):
     kb.row(
         InlineKeyboardButton(
             text=_["S_B_3"],
-            url=f"https://t.me/{bot_username}?startgroup=true"
+            url=f"https://t.me/tidalxmusicbot?startgroup=true"
         )
     )
 
