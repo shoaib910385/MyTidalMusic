@@ -35,7 +35,7 @@ def start_panel(_):
     return kb.as_markup()
 
 
-def private_panel(_, bot_username: str):
+def private_panel(_):
     kb = InlineKeyboardBuilder()
 
     kb.row(
@@ -48,7 +48,9 @@ def private_panel(_, bot_username: str):
     kb.row(
         InlineKeyboardButton(
             text="˹ᴘʀιᴠᴧᴄʏ ᴘσʟιᴄʏ˼",
-            url="https://telegra.ph/Privacy-Policy-08-03-101"
+            url="https://telegra.ph/Privacy-Policy-08-03-101",
+            style="primary",
+            icon_custom_emoji_id="6141008793179261507"
         ),
         InlineKeyboardButton(
             text="˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
