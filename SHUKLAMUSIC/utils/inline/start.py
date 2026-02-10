@@ -25,8 +25,7 @@ def private_panel(_):
             InlineKeyboardButton(
                 text=_["S_B_3"],
                 url=f"https://t.me/{app.username}?startgroup=true",
-                style="secondary",
-                icon_custom_emoji_id= "5204046146955153467"
+                style="secondary"
             )
         ],
         [
