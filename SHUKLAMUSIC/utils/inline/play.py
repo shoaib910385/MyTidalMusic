@@ -1,44 +1,43 @@
 import math
-from pyrogram.raw.types import (
-    ReplyInlineMarkup,
-    KeyboardButtonRow,
-    KeyboardButtonUrl,
-    KeyboardButtonCallback
-)
+from pyrogram.types import InlineKeyboardButton
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
+
+
+# --- Monkey Patch to allow style parameter ---
+_original_init = InlineKeyboardButton.__init__
+
+def _new_init(self, *args, style=None, **kwargs):
+    _original_init(self, *args, **kwargs)
+    self.style = style
+
+InlineKeyboardButton.__init__ = _new_init
 
 
 # ==========================================
 # TRACK MARKUP
 # ==========================================
 def track_markup(_, videoid, user_id, channel, fplay):
-    return ReplyInlineMarkup(
-        rows=[
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonCallback(
-                        text=_["P_B_1"],
-                        data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}".encode(),
-                        style="primary"
-                    ),
-                    KeyboardButtonCallback(
-                        text=_["P_B_2"],
-                        data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}".encode(),
-                        style="success"
-                    )
-                ]
+    return [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}",
+                style="primary"
             ),
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonCallback(
-                        text=_["CLOSE_BUTTON"],
-                        data=f"forceclose {videoid}|{user_id}".encode(),
-                        style="danger"
-                    )
-                ]
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}",
+                style="success"
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
+                style="danger"
             )
-        ]
-    )
+        ],
+    ]
 
 
 # ==========================================
@@ -72,52 +71,39 @@ def stream_markup_timer(_, chat_id, played, dur):
     else:
         bar = "▰▰▰▰▰▰▰▰▰▰"
 
-    return ReplyInlineMarkup(
-        rows=[
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonUrl(
-                        text=" ˹ηєᴛᴡᴏʀᴋ˼ ",
-                        url="https://t.me/thedrxnet",
-                        style="success",
-                        icon_custom_emoji_id=5204046146955153467
-                    ),
-                    KeyboardButtonUrl(
-                        text=" ˹ϻʏ ʜᴏϻє˼ ",
-                        url="https://t.me/drx_supportchat",
-                        style="primary",
-                        icon_custom_emoji_id=5424663180838182778
-                    )
-                ]
+    return [
+        [
+            InlineKeyboardButton(
+                text=" ˹ηєᴛᴡᴏʀᴋ˼ ",
+                url="https://t.me/thedrxnet",
+                style="success"
             ),
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonUrl(
-                        text="˹ᴘʀιᴠᴧᴄʏ˼",
-                        url="https://telegra.ph/Privacy-Policy-08-03-101",
-                        style="primary",
-                        icon_custom_emoji_id=5409029744693897259
-                    ),
-                    KeyboardButtonUrl(
-                        text="˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
-                        url="http://t.me/TidalXMusicBot/tidaltunes",
-                        style="success",
-                        icon_custom_emoji_id=6141008793179261507
-                    )
-                ]
+            InlineKeyboardButton(
+                text=" ˹ϻʏ ʜᴏϻє˼ ",
+                url="https://t.me/drx_supportchat",
+                style="primary"
             ),
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonCallback(
-                        text=_["CLOSE_BUTTON"],
-                        data=b"close",
-                        style="danger",
-                        icon_custom_emoji_id=5224674827633175944
-                    )
-                ]
+        ],
+        [
+            InlineKeyboardButton(
+                text="˹ᴘʀιᴠᴧᴄʏ˼",
+                url="https://telegra.ph/Privacy-Policy-08-03-101",
+                style="primary"
+            ),
+            InlineKeyboardButton(
+                text="˹ᴛιᴅᴧʟ ᴛᴜηєs˼♪",
+                url="http://t.me/TidalXMusicBot/tidaltunes",
+                style="success"
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data="close",
+                style="danger"
             )
-        ]
-    )
+        ],
+    ]
 
 
 # ==========================================
@@ -138,28 +124,22 @@ def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
 # LIVESTREAM MARKUP
 # ==========================================
 def livestream_markup(_, videoid, user_id, mode, channel, fplay):
-    return ReplyInlineMarkup(
-        rows=[
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonCallback(
-                        text=_["P_B_3"],
-                        data=f"LiveStream {videoid}|{user_id}|{mode}|{channel}|{fplay}".encode(),
-                        style="primary"
-                    )
-                ]
-            ),
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonCallback(
-                        text=_["CLOSE_BUTTON"],
-                        data=f"forceclose {videoid}|{user_id}".encode(),
-                        style="danger"
-                    )
-                ]
+    return [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_3"],
+                callback_data=f"LiveStream {videoid}|{user_id}|{mode}|{channel}|{fplay}",
+                style="primary"
             )
-        ]
-    )
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
+                style="danger"
+            )
+        ],
+    ]
 
 
 # ==========================================
@@ -168,38 +148,32 @@ def livestream_markup(_, videoid, user_id, mode, channel, fplay):
 def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
     query = query[:20]
 
-    return ReplyInlineMarkup(
-        rows=[
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonCallback(
-                        text=_["P_B_1"],
-                        data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}".encode(),
-                        style="primary"
-                    ),
-                    KeyboardButtonCallback(
-                        text=_["P_B_2"],
-                        data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}".encode(),
-                        style="success"
-                    )
-                ]
+    return [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}",
+                style="primary"
             ),
-            KeyboardButtonRow(
-                buttons=[
-                    KeyboardButtonCallback(
-                        text="◁",
-                        data=f"slider B|{query_type}|{query}|{user_id}|{channel}|{fplay}".encode()
-                    ),
-                    KeyboardButtonCallback(
-                        text=_["CLOSE_BUTTON"],
-                        data=f"forceclose {query}|{user_id}".encode(),
-                        style="danger"
-                    ),
-                    KeyboardButtonCallback(
-                        text="▷",
-                        data=f"slider F|{query_type}|{query}|{user_id}|{channel}|{fplay}".encode()
-                    )
-                ]
-            )
-        ]
-    )
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}",
+                style="success"
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="◁",
+                callback_data=f"slider B|{query_type}|{query}|{user_id}|{channel}|{fplay}",
+            ),
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {query}|{user_id}",
+                style="danger"
+            ),
+            InlineKeyboardButton(
+                text="▷",
+                callback_data=f"slider F|{query_type}|{query}|{user_id}|{channel}|{fplay}",
+            ),
+        ],
+    ]
