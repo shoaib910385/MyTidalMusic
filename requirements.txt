@@ -1,4 +1,5 @@
 aiofiles
+aiogram
 aiohttp
 apscheduler
 asyncio
