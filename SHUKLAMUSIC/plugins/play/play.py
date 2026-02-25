@@ -79,7 +79,7 @@ async def jiosaavn_play_logic(query: str):
                 # Extract stream URL
                 download_urls = song.get("downloadUrl", [])
                 stream_url = None
-                quality_priority = ["320kbps", "160kbps", "96kbps", "48kbps", "12kbps"]
+                quality_priority = ["320kbps", "160kbps"]
                 for quality in quality_priority:
                     for dl in download_urls:
                         if dl.get("quality") == quality:
