@@ -1,6 +1,7 @@
 import random
 import string
-
+import aiohttp
+import asyncio
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
 from pytgcalls.exceptions import NoActiveGroupCall
@@ -24,15 +25,194 @@ from SHUKLAMUSIC.utils.logger import play_logs
 from SHUKLAMUSIC.utils.stream.stream import stream
 from config import BANNED_USERS, lyrical
 
+# JioSaavn API Base URL
+JIOSAAVN_API = "https://jiosavan-lilac.vercel.app"
+
+
+async def search_jiosaavn_song(query: str):
+    """
+    Search for a song on JioSaavn API
+    Returns: dict with song details or None if failed
+    """
+    try:
+        async with aiohttp.ClientSession() as session:
+            url = f"{JIOSAAVN_API}/api/search/songs?query={query}"
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status != 200:
+                    return None
+                data = await resp.json()
+                
+                if not data.get("success") or not data.get("data", {}).get("results"):
+                    return None
+                
+                song = data["data"]["results"][0]
+                
+                # Extract song details
+                song_id = song.get("id", "")
+                title = song.get("name", "Unknown Title")
+                duration = song.get("duration", 0)
+                
+                # Get primary artist
+                artists = song.get("artists", {})
+                primary_artists = artists.get("primary", [])
+                artist_name = primary_artists[0].get("name", "Unknown Artist") if primary_artists else "Unknown Artist"
+                
+                # Get song image (highest quality)
+                images = song.get("image", [])
+                image_url = None
+                for img in images:
+                    if img.get("quality") == "500x500":
+                        image_url = img.get("url")
+                        break
+                if not image_url and images:
+                    image_url = images[-1].get("url")
+                
+                # Get download URL (160kbps or 320kbps)
+                download_urls = song.get("downloadUrl", [])
+                audio_url = None
+                
+                # Priority: 160kbps > 320kbps > 96kbps > 48kbps > 12kbps
+                quality_priority = ["160kbps", "320kbps", "96kbps", "48kbps", "12kbps"]
+                for quality in quality_priority:
+                    for dl in download_urls:
+                        if dl.get("quality") == quality:
+                            audio_url = dl.get("url")
+                            break
+                    if audio_url:
+                        break
+                
+                if not audio_url and download_urls:
+                    audio_url = download_urls[-1].get("url")
+                
+                if not audio_url:
+                    return None
+                
+                # Format duration
+                duration_min = "00:00"
+                if duration:
+                    minutes = int(duration) // 60
+                    seconds = int(duration) % 60
+                    duration_min = f"{minutes}:{seconds:02d}"
+                
+                return {
+                    "id": song_id,
+                    "title": title,
+                    "artist": artist_name,
+                    "duration": duration,
+                    "duration_min": duration_min,
+                    "image": image_url,
+                    "audio_url": audio_url,
+                    "url": song.get("url", ""),
+                }
+    except Exception as e:
+        print(f"JioSaavn API Error: {e}")
+        return None
+
+
+async def get_jiosaavn_thumbnail(song_data: dict, output_path: str):
+    """
+    Generate custom thumbnail using template
+    """
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+        import aiofiles
+        import os
+        
+        # Template path (user will place this in assets folder)
+        template_path = "SHUKLAMUSIC/assets/template.png"
+        
+        # Download song image
+        async with aiohttp.ClientSession() as session:
+            async with session.get(song_data["image"]) as resp:
+                if resp.status == 200:
+                    song_img_data = await resp.read()
+                    song_img_path = f"cache/temp_song_img_{song_data['id']}.jpg"
+                    async with aiofiles.open(song_img_path, mode="wb") as f:
+                        await f.write(song_img_data)
+                else:
+                    return None
+        
+        # Open template and song image
+        template = Image.open(template_path)
+        song_img = Image.open(song_img_path)
+        
+        # Resize song image to fit in template (left side area ~400x400)
+        song_img = song_img.resize((380, 380), Image.Resampling.LANCZOS)
+        
+        # Create rounded corners for song image
+        mask = Image.new("L", (380, 380), 0)
+        draw_mask = ImageDraw.Draw(mask)
+        draw_mask.rounded_rectangle([0, 0, 380, 380], radius=30, fill=255)
+        
+        # Paste song image onto template (position based on template design)
+        # Left side position (adjust as needed)
+        img_position = (60, 60)
+        template.paste(song_img, img_position, mask)
+        
+        # Prepare text
+        draw = ImageDraw.Draw(template)
+        
+        # Try to load Google Sans font, fallback to default
+        try:
+            title_font = ImageFont.truetype("SHUKLAMUSIC/assets/GoogleSans-Bold.ttf", 42)
+            artist_font = ImageFont.truetype("SHUKLAMUSIC/assets/GoogleSans-Regular.ttf", 32)
+            duration_font = ImageFont.truetype("SHUKLAMUSIC/assets/GoogleSans-Medium.ttf", 28)
+        except:
+            try:
+                title_font = ImageFont.truetype("SHUKLAMUSIC/assets/font.ttf", 42)
+                artist_font = ImageFont.truetype("SHUKLAMUSIC/assets/font2.ttf", 32)
+                duration_font = ImageFont.truetype("SHUKLAMUSIC/assets/font2.ttf", 28)
+            except:
+                title_font = ImageFont.load_default()
+                artist_font = ImageFont.load_default()
+                duration_font = ImageFont.load_default()
+        
+        # Truncate title to 4 words max
+        title_words = song_data["title"].split()[:4]
+        display_title = " ".join(title_words)
+        if len(song_data["title"].split()) > 4:
+            display_title += "..."
+        
+        # Text positions (right side of template)
+        # Green area - Title
+        title_position = (480, 120)
+        draw.text(title_position, display_title, font=title_font, fill=(255, 255, 255))
+        
+        # Blue area - Artist
+        artist_position = (480, 190)
+        draw.text(artist_position, song_data["artist"], font=artist_font, fill=(200, 200, 200))
+        
+        # Purple area - Duration (bottom right)
+        duration_position = (1050, 350)
+        draw.text(duration_position, song_data["duration_min"], font=duration_font, fill=(180, 180, 180))
+        
+        # Save thumbnail
+        template.save(output_path, "PNG")
+        
+        # Cleanup temp file
+        if os.path.exists(song_img_path):
+            os.remove(song_img_path)
+        
+        return output_path
+        
+    except Exception as e:
+        print(f"Thumbnail generation error: {e}")
+        return None
+
+
+# Audio commands that use JioSaavn API
+AUDIO_COMMANDS = ["play", "cplay", "cvplay", "playforce", "cplayforce"]
+# Video commands that use YouTube
+VIDEO_COMMANDS = ["vplay", "vplayforce", "cvplayforce"]
+
 
 @app.on_message(
-   filters.command(["play", "vplay", "cplay", "cvplay", "playforce", "vplayforce", "cplayforce", "cvplayforce"] ,prefixes=["/", "!", "%", ",", "", ".", "@", "#"])
-            
+    filters.command(AUDIO_COMMANDS + VIDEO_COMMANDS, prefixes=["/", "!", "%", ",", "", ".", "@", "#"])
     & filters.group
     & ~BANNED_USERS
 )
 @PlayWrapper
-async def play_commnd(
+async def play_command(
     client,
     message: Message,
     _,
@@ -46,23 +226,30 @@ async def play_commnd(
     mystic = await message.reply_text(
         _["play_2"].format(channel) if channel else _["play_1"]
     )
+    
+    # Determine if this is a video command
+    command = message.command[0].lower()
+    is_video_command = command in ["vplay", "vplayforce"] or (command == "cvplayforce" and video)
+    
     plist_id = None
     slider = None
     plist_type = None
     spotify = None
     user_id = message.from_user.id
     user_name = message.from_user.first_name
+    
     audio_telegram = (
         (message.reply_to_message.audio or message.reply_to_message.voice)
         if message.reply_to_message
         else None
     )
-
     video_telegram = (
         (message.reply_to_message.video or message.reply_to_message.document)
         if message.reply_to_message
         else None
     )
+    
+    # Handle Telegram audio reply
     if audio_telegram:
         if audio_telegram.file_size > 104857600:
             return await mystic.edit_text(_["play_5"])
@@ -82,7 +269,6 @@ async def play_commnd(
                 "path": file_path,
                 "dur": dur,
             }
-
             try:
                 await stream(
                     _,
@@ -101,6 +287,8 @@ async def play_commnd(
                 return await mystic.edit_text(err)
             return await mystic.delete()
         return
+    
+    # Handle Telegram video reply
     elif video_telegram:
         if message.reply_to_message.document:
             try:
@@ -145,7 +333,10 @@ async def play_commnd(
                 return await mystic.edit_text(err)
             return await mystic.delete()
         return
+    
+    # Handle URL input
     elif url:
+        # Existing URL handling logic (YouTube, Spotify, Apple, etc.)
         if await YouTube.exists(url):
             if "playlist" in url:
                 try:
@@ -164,7 +355,7 @@ async def play_commnd(
                 else:
                     plist_id = url.split("=")[1]
                 img = config.PLAYLIST_IMG_URL
-                has_spoiler=True
+                has_spoiler = True
                 cap = _["play_10"]
             elif "https://youtu.be" in url:
                 videoid = url.split("/")[-1].split("?")[0]
@@ -183,11 +374,11 @@ async def play_commnd(
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
-                has_spoiler=True
+                has_spoiler = True
                 cap = _["play_11"].format(
                     details["title"],
                     details["duration_min"],
-                                  )
+                )
         elif await Spotify.valid(url):
             spotify = True
             if not config.SPOTIFY_CLIENT_ID and not config.SPOTIFY_CLIENT_SECRET:
@@ -201,7 +392,7 @@ async def play_commnd(
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
-                has_spoiler=True
+                has_spoiler = True
                 cap = _["play_10"].format(details["title"], details["duration_min"])
             elif "playlist" in url:
                 try:
@@ -240,7 +431,7 @@ async def play_commnd(
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
-                has_spoiler=True
+                has_spoiler = True
                 cap = _["play_10"].format(details["title"], details["duration_min"])
             elif "playlist" in url:
                 spotify = True
@@ -261,7 +452,7 @@ async def play_commnd(
                 return await mystic.edit_text(_["play_3"])
             streamtype = "youtube"
             img = details["thumb"]
-            has_spoiler=True
+            has_spoiler = True
             cap = _["play_10"].format(details["title"], details["duration_min"])
         elif await SoundCloud.valid(url):
             try:
@@ -323,6 +514,8 @@ async def play_commnd(
                 err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
                 return await mystic.edit_text(err)
             return await play_logs(message, streamtype="M3u8 or Index Link")
+    
+    # Handle search query (text input)
     else:
         if len(message.command) < 2:
             buttons = botplaylist_markup(_)
@@ -330,18 +523,74 @@ async def play_commnd(
                 _["play_18"],
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
+        
         slider = True
         query = message.text.split(None, 1)[1]
-        if "-v" in query:
-            query = query.replace("-v", "")
-        try:
-            details, track_id = await YouTube.track(query)
-        except:
-            return await mystic.edit_text(_["play_3"])
-        streamtype = "youtube"
+        
+        # For video commands, use YouTube directly
+        if is_video_command or "-v" in query:
+            query = query.replace("-v", "").strip()
+            try:
+                details, track_id = await YouTube.track(query)
+            except:
+                return await mystic.edit_text(_["play_3"])
+            streamtype = "youtube"
+            img = details["thumb"]
+            has_spoiler = True
+            cap = _["play_11"].format(
+                details["title"],
+                details["duration_min"],
+            )
+        else:
+            # For audio commands, try JioSaavn API first
+            jiosaavn_data = await search_jiosaavn_song(query)
+            
+            if jiosaavn_data:
+                # Use JioSaavn data
+                track_id = jiosaavn_data["id"]
+                streamtype = "jiosaavn"
+                
+                # Generate custom thumbnail
+                thumb_path = f"cache/jiosaavn_{track_id}_thumb.png"
+                img = await get_jiosaavn_thumbnail(jiosaavn_data, thumb_path)
+                
+                if not img:
+                    # Fallback to song image if thumbnail generation fails
+                    img = jiosaavn_data["image"]
+                
+                has_spoiler = True
+                cap = _["play_11"].format(
+                    jiosaavn_data["title"],
+                    jiosaavn_data["duration_min"],
+                )
+                
+                # Create details dict for streaming
+                details = {
+                    "title": jiosaavn_data["title"],
+                    "duration_min": jiosaavn_data["duration_min"],
+                    "thumb": img,
+                    "link": jiosaavn_data["audio_url"],
+                    "duration_sec": jiosaavn_data["duration"] if jiosaavn_data["duration"] else 0,
+                    "jiosaavn_data": jiosaavn_data,
+                }
+            else:
+                # Fallback to YouTube if JioSaavn fails
+                try:
+                    details, track_id = await YouTube.track(query)
+                except:
+                    return await mystic.edit_text(_["play_3"])
+                streamtype = "youtube"
+                img = details["thumb"]
+                has_spoiler = True
+                cap = _["play_11"].format(
+                    details["title"],
+                    details["duration_min"],
+                )
+    
+    # Direct play mode
     if str(playmode) == "Direct":
         if not plist_type:
-            if details["duration_min"]:
+            if details.get("duration_min"):
                 duration_sec = time_to_seconds(details["duration_min"])
                 if duration_sec > config.DURATION_LIMIT:
                     return await mystic.edit_text(
@@ -360,6 +609,7 @@ async def play_commnd(
                     _["play_13"],
                     reply_markup=InlineKeyboardMarkup(buttons),
                 )
+        
         try:
             await stream(
                 _,
@@ -380,6 +630,8 @@ async def play_commnd(
             return await mystic.edit_text(err)
         await mystic.delete()
         return await play_logs(message, streamtype=streamtype)
+    
+    # Playlist or slider mode
     else:
         if plist_type:
             ran_hash = "".join(
@@ -414,15 +666,12 @@ async def play_commnd(
                 )
                 await mystic.delete()
                 await message.reply_photo(
-                    photo=details["thumb"],
-                    has_spoiler=True,
-                    caption=_["play_10"].format(
-                        details["title"].title(),
-                        details["duration_min"],
-                    ),
+                    photo=img,
+                    has_spoiler=has_spoiler,
+                    caption=cap,
                     reply_markup=InlineKeyboardMarkup(buttons),
                 )
-                return await play_logs(message, streamtype=f"Searched on Youtube")
+                return await play_logs(message, streamtype=f"Searched on {'JioSaavn' if streamtype == 'jiosaavn' else 'Youtube'}")
             else:
                 buttons = track_markup(
                     _,
