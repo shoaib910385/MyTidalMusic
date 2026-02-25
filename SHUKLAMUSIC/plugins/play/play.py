@@ -1,10 +1,17 @@
 import random
 import string
+import urllib.parse
 import aiohttp
-import asyncio
+import requests
+import re 
+from pyrogram import enums 
+
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
+from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message, InlineKeyboardButton, WebAppInfo
 from pytgcalls.exceptions import NoActiveGroupCall
+from py_yt import VideosSearch
+
+from SHUKLAMUSIC.utils.thumbnails import get_thumb
 
 import config
 from SHUKLAMUSIC import Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app
@@ -25,194 +32,55 @@ from SHUKLAMUSIC.utils.logger import play_logs
 from SHUKLAMUSIC.utils.stream.stream import stream
 from config import BANNED_USERS, lyrical
 
-# JioSaavn API Base URL
-JIOSAAVN_API = "https://jiosavan-lilac.vercel.app"
+dm_queues = {}
 
 
-async def search_jiosaavn_song(query: str):
-    """
-    Search for a song on JioSaavn API
-    Returns: dict with song details or None if failed
-    """
+JIOSAAVN_CACHE = {}
+
+JIOSAAVN_API = "https://jiosavan-lilac.vercel.app/api/search/songs?query="
+
+async def jiosaavn_play_logic(query):
+    
+    cache_key = query.lower().strip()
+    
+
+    if cache_key in JIOSAAVN_CACHE:
+        return JIOSAAVN_CACHE[cache_key]
+        
+    
     try:
         async with aiohttp.ClientSession() as session:
-            url = f"{JIOSAAVN_API}/api/search/songs?query={query}"
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                if resp.status != 200:
-                    return None
-                data = await resp.json()
-                
-                if not data.get("success") or not data.get("data", {}).get("results"):
-                    return None
-                
-                song = data["data"]["results"][0]
-                
-                # Extract song details
-                song_id = song.get("id", "")
-                title = song.get("name", "Unknown Title")
-                duration = song.get("duration", 0)
-                
-                # Get primary artist
-                artists = song.get("artists", {})
-                primary_artists = artists.get("primary", [])
-                artist_name = primary_artists[0].get("name", "Unknown Artist") if primary_artists else "Unknown Artist"
-                
-                # Get song image (highest quality)
-                images = song.get("image", [])
-                image_url = None
-                for img in images:
-                    if img.get("quality") == "500x500":
-                        image_url = img.get("url")
-                        break
-                if not image_url and images:
-                    image_url = images[-1].get("url")
-                
-                # Get download URL (160kbps or 320kbps)
-                download_urls = song.get("downloadUrl", [])
-                audio_url = None
-                
-                # Priority: 160kbps > 320kbps > 96kbps > 48kbps > 12kbps
-                quality_priority = ["160kbps", "320kbps", "96kbps", "48kbps", "12kbps"]
-                for quality in quality_priority:
-                    for dl in download_urls:
-                        if dl.get("quality") == quality:
-                            audio_url = dl.get("url")
-                            break
-                    if audio_url:
-                        break
-                
-                if not audio_url and download_urls:
-                    audio_url = download_urls[-1].get("url")
-                
-                if not audio_url:
-                    return None
-                
-                # Format duration
-                duration_min = "00:00"
-                if duration:
-                    minutes = int(duration) // 60
-                    seconds = int(duration) % 60
-                    duration_min = f"{minutes}:{seconds:02d}"
-                
-                return {
-                    "id": song_id,
-                    "title": title,
-                    "artist": artist_name,
-                    "duration": duration,
-                    "duration_min": duration_min,
-                    "image": image_url,
-                    "audio_url": audio_url,
-                    "url": song.get("url", ""),
-                }
-    except Exception as e:
-        print(f"JioSaavn API Error: {e}")
-        return None
-
-
-async def get_jiosaavn_thumbnail(song_data: dict, output_path: str):
-    """
-    Generate custom thumbnail using template
-    """
-    try:
-        from PIL import Image, ImageDraw, ImageFont
-        import aiofiles
-        import os
-        
-        # Template path (user will place this in assets folder)
-        template_path = "SHUKLAMUSIC/assets/template.png"
-        
-        # Download song image
-        async with aiohttp.ClientSession() as session:
-            async with session.get(song_data["image"]) as resp:
+            async with session.get(JIOSAAVN_API + urllib.parse.quote(query), timeout=5) as resp:
                 if resp.status == 200:
-                    song_img_data = await resp.read()
-                    song_img_path = f"cache/temp_song_img_{song_data['id']}.jpg"
-                    async with aiofiles.open(song_img_path, mode="wb") as f:
-                        await f.write(song_img_data)
-                else:
-                    return None
-        
-        # Open template and song image
-        template = Image.open(template_path)
-        song_img = Image.open(song_img_path)
-        
-        # Resize song image to fit in template (left side area ~400x400)
-        song_img = song_img.resize((380, 380), Image.Resampling.LANCZOS)
-        
-        # Create rounded corners for song image
-        mask = Image.new("L", (380, 380), 0)
-        draw_mask = ImageDraw.Draw(mask)
-        draw_mask.rounded_rectangle([0, 0, 380, 380], radius=30, fill=255)
-        
-        # Paste song image onto template (position based on template design)
-        # Left side position (adjust as needed)
-        img_position = (60, 60)
-        template.paste(song_img, img_position, mask)
-        
-        # Prepare text
-        draw = ImageDraw.Draw(template)
-        
-        # Try to load Google Sans font, fallback to default
-        try:
-            title_font = ImageFont.truetype("SHUKLAMUSIC/assets/GoogleSans-Bold.ttf", 42)
-            artist_font = ImageFont.truetype("SHUKLAMUSIC/assets/GoogleSans-Regular.ttf", 32)
-            duration_font = ImageFont.truetype("SHUKLAMUSIC/assets/GoogleSans-Medium.ttf", 28)
-        except:
-            try:
-                title_font = ImageFont.truetype("SHUKLAMUSIC/assets/font.ttf", 42)
-                artist_font = ImageFont.truetype("SHUKLAMUSIC/assets/font2.ttf", 32)
-                duration_font = ImageFont.truetype("SHUKLAMUSIC/assets/font2.ttf", 28)
-            except:
-                title_font = ImageFont.load_default()
-                artist_font = ImageFont.load_default()
-                duration_font = ImageFont.load_default()
-        
-        # Truncate title to 4 words max
-        title_words = song_data["title"].split()[:4]
-        display_title = " ".join(title_words)
-        if len(song_data["title"].split()) > 4:
-            display_title += "..."
-        
-        # Text positions (right side of template)
-        # Green area - Title
-        title_position = (480, 120)
-        draw.text(title_position, display_title, font=title_font, fill=(255, 255, 255))
-        
-        # Blue area - Artist
-        artist_position = (480, 190)
-        draw.text(artist_position, song_data["artist"], font=artist_font, fill=(200, 200, 200))
-        
-        # Purple area - Duration (bottom right)
-        duration_position = (1050, 350)
-        draw.text(duration_position, song_data["duration_min"], font=duration_font, fill=(180, 180, 180))
-        
-        # Save thumbnail
-        template.save(output_path, "PNG")
-        
-        # Cleanup temp file
-        if os.path.exists(song_img_path):
-            os.remove(song_img_path)
-        
-        return output_path
-        
-    except Exception as e:
-        print(f"Thumbnail generation error: {e}")
-        return None
-
-
-# Audio commands that use JioSaavn API
-AUDIO_COMMANDS = ["play", "cplay", "cvplay", "playforce", "cplayforce"]
-# Video commands that use YouTube
-VIDEO_COMMANDS = ["vplay", "vplayforce", "cvplayforce"]
+                    data = await resp.json()
+                    songs = data.get("data", {}).get("results", []) or data.get("results", [])
+                    if songs:
+                        song = songs[0]
+                        stream_url = song["downloadUrl"][-1]["url"] if "downloadUrl" in song else song["downloadUrl"][-1]["link"]
+                        title = song["name"].replace("&quot;", '"').replace("&#039;", "'")
+                        thumb = song["image"][-1]["url"] if "image" in song else song["image"][-1]["link"]
+                        duration_sec = song.get("duration", 0)
+                        mins = int(duration_sec) // 60
+                        secs = int(duration_sec) % 60
+                        duration_str = f"{mins}:{secs:02d}"
+                        
+                        # Result ko cache me save kar lo future ke liye
+                        result_tuple = (stream_url, title, thumb, duration_str)
+                        JIOSAAVN_CACHE[cache_key] = result_tuple
+                        
+                        return stream_url, title, thumb, duration_str
+    except:
+        pass
+    return None, None, None, None
 
 
 @app.on_message(
-    filters.command(AUDIO_COMMANDS + VIDEO_COMMANDS, prefixes=["/", "!", "%", ",", "", ".", "@", "#"])
+   filters.command(["play", "vplay", "cplay", "cvplay", "playforce", "vplayforce", "cplayforce", "cvplayforce"] ,prefixes=["/", "!", "%", ",", "", ".", "@", "#"])
     & filters.group
     & ~BANNED_USERS
 )
 @PlayWrapper
-async def play_command(
+async def play_commnd(
     client,
     message: Message,
     _,
@@ -226,30 +94,23 @@ async def play_command(
     mystic = await message.reply_text(
         _["play_2"].format(channel) if channel else _["play_1"]
     )
-    
-    # Determine if this is a video command
-    command = message.command[0].lower()
-    is_video_command = command in ["vplay", "vplayforce"] or (command == "cvplayforce" and video)
-    
     plist_id = None
     slider = None
     plist_type = None
     spotify = None
     user_id = message.from_user.id
     user_name = message.from_user.first_name
-    
     audio_telegram = (
         (message.reply_to_message.audio or message.reply_to_message.voice)
         if message.reply_to_message
         else None
     )
+
     video_telegram = (
         (message.reply_to_message.video or message.reply_to_message.document)
         if message.reply_to_message
         else None
     )
-    
-    # Handle Telegram audio reply
     if audio_telegram:
         if audio_telegram.file_size > 104857600:
             return await mystic.edit_text(_["play_5"])
@@ -269,6 +130,7 @@ async def play_command(
                 "path": file_path,
                 "dur": dur,
             }
+
             try:
                 await stream(
                     _,
@@ -287,8 +149,6 @@ async def play_command(
                 return await mystic.edit_text(err)
             return await mystic.delete()
         return
-    
-    # Handle Telegram video reply
     elif video_telegram:
         if message.reply_to_message.document:
             try:
@@ -333,10 +193,7 @@ async def play_command(
                 return await mystic.edit_text(err)
             return await mystic.delete()
         return
-    
-    # Handle URL input
     elif url:
-        # Existing URL handling logic (YouTube, Spotify, Apple, etc.)
         if await YouTube.exists(url):
             if "playlist" in url:
                 try:
@@ -355,7 +212,7 @@ async def play_command(
                 else:
                     plist_id = url.split("=")[1]
                 img = config.PLAYLIST_IMG_URL
-                has_spoiler = True
+                has_spoiler=True
                 cap = _["play_10"]
             elif "https://youtu.be" in url:
                 videoid = url.split("/")[-1].split("?")[0]
@@ -374,11 +231,11 @@ async def play_command(
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
-                has_spoiler = True
+                has_spoiler=True
                 cap = _["play_11"].format(
                     details["title"],
                     details["duration_min"],
-                )
+                                  )
         elif await Spotify.valid(url):
             spotify = True
             if not config.SPOTIFY_CLIENT_ID and not config.SPOTIFY_CLIENT_SECRET:
@@ -392,7 +249,7 @@ async def play_command(
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
-                has_spoiler = True
+                has_spoiler=True
                 cap = _["play_10"].format(details["title"], details["duration_min"])
             elif "playlist" in url:
                 try:
@@ -431,7 +288,7 @@ async def play_command(
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
-                has_spoiler = True
+                has_spoiler=True
                 cap = _["play_10"].format(details["title"], details["duration_min"])
             elif "playlist" in url:
                 spotify = True
@@ -452,7 +309,7 @@ async def play_command(
                 return await mystic.edit_text(_["play_3"])
             streamtype = "youtube"
             img = details["thumb"]
-            has_spoiler = True
+            has_spoiler=True
             cap = _["play_10"].format(details["title"], details["duration_min"])
         elif await SoundCloud.valid(url):
             try:
@@ -514,8 +371,6 @@ async def play_command(
                 err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
                 return await mystic.edit_text(err)
             return await play_logs(message, streamtype="M3u8 or Index Link")
-    
-    # Handle search query (text input)
     else:
         if len(message.command) < 2:
             buttons = botplaylist_markup(_)
@@ -523,74 +378,48 @@ async def play_command(
                 _["play_18"],
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
-        
         slider = True
         query = message.text.split(None, 1)[1]
-        
-        # For video commands, use YouTube directly
-        if is_video_command or "-v" in query:
-            query = query.replace("-v", "").strip()
-            try:
-                details, track_id = await YouTube.track(query)
-            except:
-                return await mystic.edit_text(_["play_3"])
-            streamtype = "youtube"
-            img = details["thumb"]
-            has_spoiler = True
-            cap = _["play_11"].format(
-                details["title"],
-                details["duration_min"],
-            )
-        else:
-            # For audio commands, try JioSaavn API first
-            jiosaavn_data = await search_jiosaavn_song(query)
+        if "-v" in query:
+            query = query.replace("-v", "")
             
-            if jiosaavn_data:
-                # Use JioSaavn data
-                track_id = jiosaavn_data["id"]
-                streamtype = "jiosaavn"
-                
-                # Generate custom thumbnail
-                thumb_path = f"cache/jiosaavn_{track_id}_thumb.png"
-                img = await get_jiosaavn_thumbnail(jiosaavn_data, thumb_path)
-                
-                if not img:
-                    # Fallback to song image if thumbnail generation fails
-                    img = jiosaavn_data["image"]
-                
-                has_spoiler = True
-                cap = _["play_11"].format(
-                    jiosaavn_data["title"],
-                    jiosaavn_data["duration_min"],
-                )
-                
-                # Create details dict for streaming
+        
+        if str(playmode) == "Direct" and not video:
+            stream_url, js_title, js_thumb, js_dur = await jiosaavn_play_logic(query)
+            if stream_url:
                 details = {
-                    "title": jiosaavn_data["title"],
-                    "duration_min": jiosaavn_data["duration_min"],
-                    "thumb": img,
-                    "link": jiosaavn_data["audio_url"],
-                    "duration_sec": jiosaavn_data["duration"] if jiosaavn_data["duration"] else 0,
-                    "jiosaavn_data": jiosaavn_data,
+                    "title": js_title,
+                    "link": stream_url,
+                    "path": stream_url,
+                    "dur": js_dur,
                 }
-            else:
-                # Fallback to YouTube if JioSaavn fails
                 try:
-                    details, track_id = await YouTube.track(query)
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "youtube"
-                img = details["thumb"]
-                has_spoiler = True
-                cap = _["play_11"].format(
-                    details["title"],
-                    details["duration_min"],
-                )
-    
-    # Direct play mode
+                    await stream(
+                        _,
+                        mystic,
+                        user_id,
+                        details,
+                        chat_id,
+                        user_name,
+                        message.chat.id,
+                        video=video,
+                        streamtype="telegram", 
+                        forceplay=fplay,
+                    )
+                    await mystic.delete()
+                    return await play_logs(message, streamtype="JioSaavn")
+                except Exception:
+                    pass
+
+        try:
+            details, track_id = await YouTube.track(query)
+        except:
+            return await mystic.edit_text(_["play_3"])
+        streamtype = "youtube"
+        
     if str(playmode) == "Direct":
         if not plist_type:
-            if details.get("duration_min"):
+            if details["duration_min"]:
                 duration_sec = time_to_seconds(details["duration_min"])
                 if duration_sec > config.DURATION_LIMIT:
                     return await mystic.edit_text(
@@ -609,7 +438,6 @@ async def play_command(
                     _["play_13"],
                     reply_markup=InlineKeyboardMarkup(buttons),
                 )
-        
         try:
             await stream(
                 _,
@@ -630,8 +458,6 @@ async def play_command(
             return await mystic.edit_text(err)
         await mystic.delete()
         return await play_logs(message, streamtype=streamtype)
-    
-    # Playlist or slider mode
     else:
         if plist_type:
             ran_hash = "".join(
@@ -666,12 +492,15 @@ async def play_command(
                 )
                 await mystic.delete()
                 await message.reply_photo(
-                    photo=img,
-                    has_spoiler=has_spoiler,
-                    caption=cap,
+                    photo=details["thumb"],
+                    has_spoiler=True,
+                    caption=_["play_10"].format(
+                        details["title"].title(),
+                        details["duration_min"],
+                    ),
                     reply_markup=InlineKeyboardMarkup(buttons),
                 )
-                return await play_logs(message, streamtype=f"Searched on {'JioSaavn' if streamtype == 'jiosaavn' else 'Youtube'}")
+                return await play_logs(message, streamtype=f"Searched on Youtube")
             else:
                 buttons = track_markup(
                     _,
@@ -687,6 +516,11 @@ async def play_command(
                     reply_markup=InlineKeyboardMarkup(buttons),
                 )
                 return await play_logs(message, streamtype=f"URL Searched Inline")
+    
+
+
+
+
 
 
 @app.on_callback_query(filters.regex("MusicStream") & ~BANNED_USERS)
@@ -919,3 +753,109 @@ async def slider_queries(client, CallbackQuery, _):
         return await CallbackQuery.edit_message_media(
             media=med, reply_markup=InlineKeyboardMarkup(buttons)
         )
+
+
+HEROKU_API = "https://serveryotr-7b18f0d07210.herokuapp.com"
+
+@app.on_message(
+    filters.command(["play", "vplay", "cplay", "cvplay"], prefixes=["/", "!", "%", ",", "", ".", "@", "#"])
+    & filters.private
+    & ~BANNED_USERS
+)
+async def play_dm_command(client, message):
+    if len(message.command) < 2:
+        return await message.reply_text("Bhai, koi gaane ka naam bhi toh likho! Jaise: /play samjava")
+
+    user_id = message.from_user.id  
+    user_mention = message.from_user.mention
+    query = message.text.split(None, 1)[1]  
+    msg = await message.reply_text("🔎 **Searching...**")  
+  
+    try:  
+        results = VideosSearch(query, limit=1)  
+        result = (await results.next())["result"][0]  
+          
+        vidid = result["id"]  
+        title_raw = result["title"]  
+        duration = result.get("duration", "Unknown")  
+        thumb_url = result["thumbnails"][0]["url"].split("?")[0]  
+        artist_name = result.get("channel", {}).get("name", "Unknown Artist")  
+        
+        # 🔥 MAIN FIX: Lamba naam clean karo taki Web Player JioSaavn se turant gaana dhundh le
+        clean_title = re.sub(r'\[.*?\]|\(.*?\)', '', title_raw).strip()
+        
+        title = urllib.parse.quote(clean_title)  
+        artist = urllib.parse.quote(artist_name)  
+
+        # 🎨 Yahan Styled Photo Generate ho rahi hai (Aapke purane code ki tarah)
+        styled_thumb = await get_thumb(vidid)
+        
+        # Web Player URL and Keyboard 
+        web_player_url = f"https://yotrplaydm.vercel.app/?vidid={vidid}&title={title}&thumb={urllib.parse.quote(thumb_url)}&artist={artist}&uid={user_id}"  
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🎵 Open Web Player", web_app=WebAppInfo(url=web_player_url))]])
+          
+        # Agar Queue empty hai (Pehla Gaana)  
+        if user_id not in dm_queues or len(dm_queues[user_id]) == 0:  
+            dm_queues[user_id] = [{"vidid": vidid, "title": title_raw}]  
+              
+            caption = f"""
+<blockquote>
+<b>▷ Started Streaming 🎵</b>
+
+<b>๏ Title:</b> {title_raw}
+<b>๏ Duration:</b> {duration} minutes
+<b>๏ Requested By:</b> {user_mention}
+
+<b>❖ Powered » 𝐆𐑴𝐣𝛐 𝐈𝐧𝐟𝛊𝐧𝛊𝐭𝐲𓆪</b>
+<b>ᴄʟɪᴄᴋ ᴛʜᴇ 👇 ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ<b>
+</blockquote>
+"""
+            await message.reply_photo(
+                photo=styled_thumb,  # ✅ FIX: Styled thumb wapas lag gayi
+                caption=caption, 
+                parse_mode=enums.ParseMode.HTML, 
+                has_spoiler=True, 
+                reply_markup=keyboard 
+            )  
+            await msg.delete()  
+              
+        # Agar gaana Queue me add ho raha hai  
+        else:  
+            dm_queues[user_id].append({"vidid": vidid, "title": title_raw})  
+            position = len(dm_queues[user_id]) - 1  
+              
+            song_data = {  
+                "uid": str(user_id),  
+                "song": {  
+                    "vidid": vidid,  
+                    "title": clean_title,  # Web player ki queue me clean title jayega
+                    "thumb": thumb_url,  
+                    "artist": artist_name  
+                }  
+            }  
+            async with aiohttp.ClientSession() as session:  
+                await session.post(f"{HEROKU_API}/queue/add", json=song_data)  
+              
+            queue_text = f"""
+<blockquote>
+<b>▣ Added To Queue At #{position}</b>
+
+<b>๏ Title:</b> {title_raw}
+<b>๏ Duration:</b> {duration} minutes
+<b>๏ Requested By:</b> {user_mention}
+
+<b>❖ Powered » 𝐆𐑴𝐣𝛐 𝐈𝐧𝐟𝛊𝐧𝛊𝐭𝐲𓆪</b>
+</blockquote>
+"""
+            await message.reply_photo(
+                photo=styled_thumb,  # ✅ FIX: Yahan bhi Styled thumb lag gayi
+                caption=queue_text, 
+                parse_mode=enums.ParseMode.HTML, 
+                has_spoiler=True,
+                reply_markup=keyboard 
+            )  
+            await msg.delete()  
+              
+    except Exception as e:  
+        await msg.edit_text(f"❌ Error aaya: {e}")
+        
