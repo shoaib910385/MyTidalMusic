@@ -94,9 +94,9 @@ TELEGRAM_VIDEO_URL = "https://files.catbox.moe/2vq8oz.jpg"
 STREAM_IMG_URL = "https://files.catbox.moe/3nkhz0.jpg"
 SOUNCLOUD_IMG_URL = "https://files.catbox.moe/3nkhz0.jpg"
 YOUTUBE_IMG_URL = "https://files.catbox.moe/3nkhz0.jpg"
-SPOTIFY_ARTIST_IMG_URL = "https://files.catbox.moe/2vq8oz.jpg"
-SPOTIFY_ALBUM_IMG_URL = "https://files.catbox.moe/2vq8oz.jpg"
-SPOTIFY_PLAYLIST_IMG_URL = "https://files.catbox.moe/2vq8oz.jpg"
+SPOTIFY_ARTIST_IMG_URL = "https://files.catbox.moe/jg31o1.jpg"
+SPOTIFY_ALBUM_IMG_URL = "https://files.catbox.moe/jg31o1.jpg"
+SPOTIFY_PLAYLIST_IMG_URL = "https://files.catbox.moe/jg31o1.jpg"
 
 # Helper function
 def time_to_seconds(time: str) -> int:
