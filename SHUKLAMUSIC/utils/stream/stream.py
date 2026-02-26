@@ -194,7 +194,7 @@ async def stream(
             await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "video" if video else "audio", forceplay=forceplay)
             if video: await add_active_video_chat(chat_id)
             cap = await get_caption(_, link, title[:23], duration_min, user_name)
-            run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL, caption=cap, reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id)))
+            run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL, has_spoiler=True, caption=cap, reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id)))
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
 
     elif streamtype == "live":
