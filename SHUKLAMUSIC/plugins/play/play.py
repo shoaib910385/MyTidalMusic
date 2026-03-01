@@ -1,17 +1,9 @@
 import random
 import string
-import urllib.parse
-import aiohttp
-import requests
-import re 
-from pyrogram import enums 
 
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message, InlineKeyboardButton, WebAppInfo
+from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
 from pytgcalls.exceptions import NoActiveGroupCall
-from py_yt import VideosSearch
-
-from SHUKLAMUSIC.utils.thumbnails import get_thumb, get_jiosaavn_thumb
 
 import config
 from SHUKLAMUSIC import Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app
@@ -32,33 +24,10 @@ from SHUKLAMUSIC.utils.logger import play_logs
 from SHUKLAMUSIC.utils.stream.stream import stream
 from config import BANNED_USERS, lyrical
 
-dm_queues = {}
-JIOSAAVN_CACHE = {}
-
-async def jiosaavn_play_logic(query):
-    cache_key = query.lower().strip()
-    if cache_key in JIOSAAVN_CACHE:
-        return JIOSAAVN_CACHE[cache_key]
-        
-    try:
-        # Calls the unified generator in thumbnails.py
-        thumb_path, song_data = await get_jiosaavn_thumb(query)
-        if song_data:
-            result_tuple = (
-                song_data["audio_url"], 
-                song_data["title"], 
-                thumb_path, 
-                song_data["duration_sec"]
-            )
-            JIOSAAVN_CACHE[cache_key] = result_tuple
-            return result_tuple
-    except Exception as e:
-        print(f"JioSaavn Error: {e}")
-    return None, None, None, None
-
 
 @app.on_message(
    filters.command(["play", "vplay", "cplay", "cvplay", "playforce", "vplayforce", "cplayforce", "cvplayforce"] ,prefixes=["/", "!", "%", ",", "", ".", "@", "#"])
+            
     & filters.group
     & ~BANNED_USERS
 )
@@ -242,7 +211,6 @@ async def play_commnd(
                 streamtype = "playlist"
                 plist_type = "spplay"
                 img = config.SPOTIFY_PLAYLIST_IMG_URL
-                has_spoiler=True
                 cap = _["play_11"].format(app.mention, message.from_user.mention)
             elif "album" in url:
                 try:
@@ -252,7 +220,6 @@ async def play_commnd(
                 streamtype = "playlist"
                 plist_type = "spalbum"
                 img = config.SPOTIFY_ALBUM_IMG_URL
-                has_spoiler=True
                 cap = _["play_11"].format(app.mention, message.from_user.mention)
             elif "artist" in url:
                 try:
@@ -262,7 +229,6 @@ async def play_commnd(
                 streamtype = "playlist"
                 plist_type = "spartist"
                 img = config.SPOTIFY_ARTIST_IMG_URL
-                has_spoiler=True
                 cap = _["play_11"].format(message.from_user.first_name)
             else:
                 return await mystic.edit_text(_["play_15"])
@@ -368,41 +334,11 @@ async def play_commnd(
         query = message.text.split(None, 1)[1]
         if "-v" in query:
             query = query.replace("-v", "")
-            
-        if str(playmode) == "Direct" and not video:
-            stream_url, js_title, js_thumb, js_dur = await jiosaavn_play_logic(query)
-            if stream_url:
-                details = {
-                    "title": js_title,
-                    "link": stream_url,
-                    "path": stream_url,
-                    "dur": js_dur,
-                    "thumb": js_thumb, # Pass custom thumb here
-                }
-                try:
-                    await stream(
-                        _,
-                        mystic,
-                        user_id,
-                        details,
-                        chat_id,
-                        user_name,
-                        message.chat.id,
-                        video=video,
-                        streamtype="telegram", 
-                        forceplay=fplay,
-                    )
-                    await mystic.delete()
-                    return await play_logs(message, streamtype="JioSaavn")
-                except Exception:
-                    pass
-
         try:
             details, track_id = await YouTube.track(query)
         except:
             return await mystic.edit_text(_["play_3"])
         streamtype = "youtube"
-        
     if str(playmode) == "Direct":
         if not plist_type:
             if details["duration_min"]:
