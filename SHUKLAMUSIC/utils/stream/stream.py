@@ -110,7 +110,7 @@ async def stream(
                         user_name,
                     ),
                     parse_mode="html", 
-                    disable_web_page_preview=True,
+                     
                
                     reply_markup=InlineKeyboardMarkup(button),
                 )
@@ -164,7 +164,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, user_name),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
         else:
@@ -201,7 +201,7 @@ async def stream(
                     user_name,
                 ),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -228,7 +228,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, user_name),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
         else:
@@ -255,7 +255,7 @@ async def stream(
                     config.SUPPORT_CHAT, title[:23], duration_min, user_name
                 ),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -284,7 +284,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, user_name),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
         else:
@@ -311,7 +311,7 @@ async def stream(
                 photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL,
                 caption=_["stream_1"].format(link, title[:23], duration_min, user_name),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -341,7 +341,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, user_name),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
         else:
@@ -381,7 +381,7 @@ async def stream(
                     user_name,
                 ),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -406,7 +406,7 @@ async def stream(
             await mystic.edit_text(
                 text=_["queue_4"].format(position, title[:27], duration_min, user_name),
                 parse_mode="html", 
-                disable_web_page_preview=True,
+                 
                 reply_markup=InlineKeyboardMarkup(button),
             )
         else:
