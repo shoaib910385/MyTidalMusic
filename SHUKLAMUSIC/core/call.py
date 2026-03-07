@@ -30,6 +30,7 @@ from pytgcalls.types.stream import StreamAudioEnded
 import config
 from SHUKLAMUSIC import LOGGER, YouTube, app
 from SHUKLAMUSIC.misc import db
+from SHUKLAMUSIC.core.mongo import mongodb
 from SHUKLAMUSIC.utils.database import (
     add_active_chat,
     add_active_video_chat,
@@ -51,6 +52,26 @@ from strings import get_string
 
 autoend = {}
 counter = {}
+
+# --- CUSTOM CAPTION LOGIC ---
+captiondb = mongodb.stream_captions
+
+async def get_stored_caption():
+    """Fetches the custom caption from MongoDB."""
+    data = await captiondb.find_one({"chat_id": "GLOBAL_CAPTION"})
+    if data and "text" in data:
+        return data["text"]
+    return None
+
+async def get_caption(_, link, title, duration, user):
+    """Generates the final caption string, formatted with arguments."""
+    custom_html = await get_stored_caption()
+    if custom_html:
+        try:
+            return custom_html.format(link, title, duration, user)
+        except Exception:
+            pass 
+    return _["stream_1"].format(link, title, duration, user)
 
 async def _clear_(chat_id):
     db[chat_id] = []
@@ -400,17 +421,15 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_6"],
                     )
-                img = await get_thumb(videoid)
+                
                 button = stream_markup(_, chat_id)
-                run = await app.send_photo(
+                vid_link = f"https://t.me/{app.username}?start=info_{videoid}"
+                cap = await get_caption(_, vid_link, title[:23], check[0]["dur"], user)
+
+                run = await app.send_message(
                     chat_id=original_chat_id,
-                    photo=img,
-                    caption=_["stream_1"].format(
-                        f"https://t.me/{app.username}?start=info_{videoid}",
-                        title[:23],
-                        check[0]["dur"],
-                        user,
-                    ),
+                    text=cap,
+                    disable_web_page_preview=False,
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -446,18 +465,16 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_6"],
                     )
-                img = await get_thumb(videoid)
+                
                 button = stream_markup(_, chat_id)
                 await mystic.delete()
-                run = await app.send_photo(
+                vid_link = f"https://t.me/{app.username}?start=info_{videoid}"
+                cap = await get_caption(_, vid_link, title[:23], check[0]["dur"], user)
+
+                run = await app.send_message(
                     chat_id=original_chat_id,
-                    photo=img,
-                    caption=_["stream_1"].format(
-                        f"https://t.me/{app.username}?start=info_{videoid}",
-                        title[:23],
-                        check[0]["dur"],
-                        user,
-                    ),
+                    text=cap,
+                    disable_web_page_preview=False,
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -480,10 +497,10 @@ class Call(PyTgCalls):
                         text=_["call_6"],
                     )
                 button = stream_markup(_, chat_id)
-                run = await app.send_photo(
+                run = await app.send_message(
                     chat_id=original_chat_id,
-                    photo=config.STREAM_IMG_URL,
-                    caption=_["stream_2"].format(user),
+                    text=_["stream_2"].format(user),
+                    disable_web_page_preview=False,
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -509,42 +526,37 @@ class Call(PyTgCalls):
                     )
                 if videoid == "telegram":
                     button = stream_markup(_, chat_id)
-                    run = await app.send_photo(
+                    cap = await get_caption(_, config.SUPPORT_CHAT, title[:23], check[0]["dur"], user)
+
+                    run = await app.send_message(
                         chat_id=original_chat_id,
-                        photo=config.TELEGRAM_AUDIO_URL
-                        if str(streamtype) == "audio"
-                        else config.TELEGRAM_VIDEO_URL,
-                        caption=_["stream_1"].format(
-                            config.SUPPORT_CHAT, title[:23], check[0]["dur"], user
-                        ),
+                        text=cap,
+                        disable_web_page_preview=False,
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 elif videoid == "soundcloud":
                     button = stream_markup(_, chat_id)
-                    run = await app.send_photo(
+                    cap = await get_caption(_, config.SUPPORT_CHAT, title[:23], check[0]["dur"], user)
+
+                    run = await app.send_message(
                         chat_id=original_chat_id,
-                        photo=config.SOUNCLOUD_IMG_URL,
-                        caption=_["stream_1"].format(
-                            config.SUPPORT_CHAT, title[:23], check[0]["dur"], user
-                        ),
+                        text=cap,
+                        disable_web_page_preview=False,
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 else:
-                    img = await get_thumb(videoid)
                     button = stream_markup(_, chat_id)
-                    run = await app.send_photo(
+                    vid_link = f"https://t.me/{app.username}?start=info_{videoid}"
+                    cap = await get_caption(_, vid_link, title[:23], check[0]["dur"], user)
+
+                    run = await app.send_message(
                         chat_id=original_chat_id,
-                        photo=img,
-                        caption=_["stream_1"].format(
-                            f"https://t.me/{app.username}?start=info_{videoid}",
-                            title[:23],
-                            check[0]["dur"],
-                            user,
-                        ),
+                        text=cap,
+                        disable_web_page_preview=False,
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
