@@ -87,6 +87,13 @@ def stream_markup_timer(_, chat_id, played, dur):
 
 def stream_markup(_, chat_id):
     buttons = [
+                [
+            InlineKeyboardButton(
+                text=f"{played} {bar} {dur}",
+                callback_data="GetTimer",
+                style="primary"
+            )
+        ],
         [
             InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
             InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
@@ -102,7 +109,7 @@ def stream_markup(_, chat_id):
             InlineKeyboardButton(
                 text=" ϻʏ ʜᴏϻє",
                 url="https://t.me/drx_supportchat"
-                
+            
             )
         ],
             
@@ -110,7 +117,6 @@ def stream_markup(_, chat_id):
         [InlineKeyboardButton(text="▣ ᴄʟᴏsᴇ ▣", callback_data="close",style="danger", icon_custom_emoji_id="5409320020058584473")],
     ]
     return buttons
-
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
     buttons = [
