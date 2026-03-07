@@ -4,7 +4,7 @@ from random import randint
 from typing import Union
 
 from pyrogram import filters, enums
-from pyrogram.types import InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardMarkup, Message, LinkPreviewOptions
 
 import config
 from SHUKLAMUSIC import Carbon, YouTube, app
@@ -132,11 +132,15 @@ async def stream(
                 await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
                 await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
                 
-                img = await get_thumb(vidid)
                 button = stream_markup(_, chat_id)
                 cap = await get_caption(_, f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
                 
-                run = await app.send_photo(original_chat_id, photo=img, has_spoiler=True, caption=cap, reply_markup=InlineKeyboardMarkup(button))
+                run = await app.send_message(
+                    original_chat_id, 
+                    text=cap, 
+                    link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                    reply_markup=InlineKeyboardMarkup(button)
+                )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
         
@@ -144,6 +148,7 @@ async def stream(
         link = await SHUKLABin(msg)
         car = os.linesep.join(msg.split(os.linesep)[:17]) if msg.count("\n") >= 17 else msg
         carbon = await Carbon.generate(car, randint(100, 10000000))
+        # Left this one as send_photo since it generates an actual Carbon image of the playlist
         return await app.send_photo(original_chat_id, photo=carbon, caption=_["play_21"].format(len(db.get(chat_id))-1, link), reply_markup=close_markup(_))
 
     elif streamtype == "youtube":
@@ -164,9 +169,13 @@ async def stream(
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
             await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
             
-            img = await get_thumb(vidid)
             cap = await get_caption(_, f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-            run = await app.send_photo(original_chat_id, photo=img, has_spoiler=True, caption=cap, reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id)))
+            run = await app.send_message(
+                original_chat_id, 
+                text=cap, 
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+            )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "stream"
 
     elif streamtype == "soundcloud":
@@ -178,8 +187,14 @@ async def stream(
             if not forceplay: db[chat_id] = []
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=None)
             await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "audio", forceplay=forceplay)
+            
             cap = await get_caption(_, config.SUPPORT_CHAT, title[:23], duration_min, user_name)
-            run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL, caption=cap, reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id)))
+            run = await app.send_message(
+                original_chat_id, 
+                text=cap, 
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+            )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
 
     elif streamtype == "telegram":
@@ -193,8 +208,14 @@ async def stream(
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status)
             await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "video" if video else "audio", forceplay=forceplay)
             if video: await add_active_video_chat(chat_id)
+            
             cap = await get_caption(_, link, title[:23], duration_min, user_name)
-            run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL, has_spoiler=True, caption=cap, reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id)))
+            run = await app.send_message(
+                original_chat_id, 
+                text=cap, 
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+            )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
 
     elif streamtype == "live":
@@ -209,9 +230,14 @@ async def stream(
             if n == 0: raise AssistantErr(_["str_3"])
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail if thumbnail else None)
             await put_queue(chat_id, original_chat_id, f"live_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
-            img = await get_thumb(vidid)
+            
             cap = await get_caption(_, f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-            run = await app.send_photo(original_chat_id, photo=img, has_spoiler=True, caption=cap, reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id)))
+            run = await app.send_message(
+                original_chat_id, 
+                text=cap, 
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+            )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
 
     elif streamtype == "index":
@@ -223,6 +249,13 @@ async def stream(
             if not forceplay: db[chat_id] = []
             await SHUKLA.join_call(chat_id, original_chat_id, link, video=True if video else None)
             await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
-            run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, has_spoiler=True, caption=_["stream_2"].format(user_name), reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id)))
+            
+            run = await app.send_message(
+                original_chat_id, 
+                text=_["stream_2"].format(user_name), 
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+            )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
             await mystic.delete()
+
