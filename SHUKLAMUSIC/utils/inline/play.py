@@ -70,14 +70,12 @@ def stream_markup_timer(_, chat_id, played, dur):
             InlineKeyboardButton(
                 text="ᴛιᴅᴧʟ ᴛᴜηєs♪",
                 url="http://t.me/TidalXMusicBot/tidaltunes",
-                style="primary",
-                icon_custom_emoji_id=5409025823388741707
+                
             ),
             InlineKeyboardButton(
                 text=" ϻʏ ʜᴏϻє",
                 url="https://t.me/drx_supportchat",
-                style="primary",
-                icon_custom_emoji_id=5409194306365829029
+            
             )
         ],
         [
