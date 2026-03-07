@@ -24,7 +24,6 @@ tgcrypto>=1.2.5
 hachoir
 heroku3
 httpx
-kurigram==2.2.6
 img2pdf
 instaloader
 lexica-api
@@ -53,7 +52,6 @@ py-tgcalls==0.9.7
 pyyaml
 qrcode
 requests
-SafoneAPI
 search_engine_parser
 speedtest-cli
 SpeechRecognition
