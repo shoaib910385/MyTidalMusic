@@ -63,21 +63,21 @@ def stream_markup_timer(_, chat_id, played, dur):
             )
         ],
         [
-            InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
-            InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
-            InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
-            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Resume|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5409222721869459068),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Pause|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5409042015415448331),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Skip|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5409119256107297715),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Stop|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5408832111773757273),
         ],
         [
             InlineKeyboardButton(
-                text="ᴛιᴅᴧʟ ᴛᴜηєs♪",
+                text=" ᴛᴜηєs",
                 url="http://t.me/TidalXMusicBot/tidaltunes",
                 icon_custom_emoji_id=5409025823388741707,
                 style=ButtonStyle.PRIMARY
                 
             ),
             InlineKeyboardButton(
-                text=" ϻʏ ʜᴏϻє",
+                text=" ʜᴏϻє",
                 url="https://t.me/drx_supportchat",
                 icon_custom_emoji_id=5409194306365829029,
                 style=ButtonStyle.PRIMARY
@@ -86,7 +86,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
             
 
-        [InlineKeyboardButton(text="▣ ᴄʟᴏsᴇ ▣", callback_data="close", style=ButtonStyle.DANGER)],
+        [InlineKeyboardButton(text=" ᴄʟᴏsᴇ ▣", callback_data="close", style=ButtonStyle.DANGER, icon_custom_emoji_id=5408832111773757273)],
     ]
     return buttons
 
@@ -94,21 +94,21 @@ def stream_markup_timer(_, chat_id, played, dur):
 def stream_markup(_, chat_id):
     buttons = [
         [
-            InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}", style=ButtonStyle.SUCCESS),
-            InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}", style=ButtonStyle.SUCCESS),
-            InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}", style=ButtonStyle.SUCCESS),
-            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}", style=ButtonStyle.SUCCESS),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Resume|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5409222721869459068),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Pause|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5409042015415448331),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Skip|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5409119256107297715),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Stop|{chat_id}", style=ButtonStyle.SUCCESS, icon_custom_emoji_id=5408832111773757273),
         ],
         [
             InlineKeyboardButton(
-                text="ᴛιᴅᴧʟ ᴛᴜηєs♪",
+                text=" ᴛᴜηєs",
                 url="http://t.me/TidalXMusicBot/tidaltunes",
                  icon_custom_emoji_id=5409025823388741707,
                 style=ButtonStyle.PRIMARY
                 
             ),
             InlineKeyboardButton(
-                text=" ϻʏ ʜᴏϻє",
+                text=" ʜᴏϻє",
                 url="https://t.me/drx_supportchat",
                 icon_custom_emoji_id=5409194306365829029,
                 style=ButtonStyle.PRIMARY
@@ -117,7 +117,7 @@ def stream_markup(_, chat_id):
         ],
             
 
-        [InlineKeyboardButton(text="▣ ᴄʟᴏsᴇ ▣", callback_data="close", style=ButtonStyle.DANGER)],
+        [InlineKeyboardButton(text=" ᴄʟᴏsᴇ ▣", callback_data="close", style=ButtonStyle.DANGER, icon_custom_emoji_id=5408832111773757273)],
     ]
     return buttons
 
