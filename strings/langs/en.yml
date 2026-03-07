@@ -208,7 +208,7 @@ queue_6 : "<b>🕚 ᴅᴜʀᴀᴛɪᴏɴ :</b> ᴜɴᴋɴᴏᴡɴ ᴅᴜʀᴀᴛ
 queue_7 : "\nᴄʟɪᴄᴋ ᴏɴ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴡʜᴏʟᴇ ǫᴜᴇᴜᴇᴅ ʟɪsᴛ."
 queue_8 : "<b>{0} ᴘʟᴀʏᴇʀ</b>\n\n🎄 <b>sᴛʀᴇᴀᴍɪɴɢ :</b> {1}\n\n🔗 <b>sᴛʀᴇᴀᴍ ᴛʏᴘᴇ :</b> {2}\n <b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {3}\n{4}"
 
-stream_1 : "<blockquote> <b>▣ Sᴛᴧʀᴛєᴅ Sᴛʀєᴧϻιηɢ ♪</b></blockquote>\n<blockquote expandable><b>๏ Tιᴛʟє:</b> <a href={0}>{1}</a>\n<b>๏ Dᴜʀᴧᴛιση:</b> {2} ᴍιηᴜᴛєs\n๏ Rєǫᴜєsᴛєᴅ: {3}</blockquote>\n<blockquote>❖ ᴘᴏᴡєʀєᴅ» [愛|𝗦𝗧么𝗟𝗞𝚵𝗥](https://t.me/HEHE_STALKER)</blockquote>"
+stream_1 : "<blockquote><tg-emoji emoji-id="5217933090483098080">❌</tg-emoji><tg-emoji emoji-id="5213412401180853808">❌</tg-emoji><tg-emoji emoji-id="5211032856154885824">❌</tg-emoji><tg-emoji emoji-id="5211094355791594395">❌</tg-emoji><tg-emoji emoji-id="5210820276748566172">❌</tg-emoji><tg-emoji emoji-id="5211009208064953810">❌</tg-emoji><tg-emoji emoji-id="5303310030940952439">❌</tg-emoji></blockquote>\n<blockquote expandable><tg-emoji emoji-id="6255793039705377676">🔹</tg-emoji><b>ᴛιᴛʟє</b>: <a href={0}>{1}</a>\n<tg-emoji emoji-id="6255793039705377676">🔹</tg-emoji><b>ᴅᴜʀᴀᴛɪᴏɴ</b>: {2} ᴍιηᴜᴛєs\n<tg-emoji emoji-id="6255793039705377676">🔹</tg-emoji><b>ʀᴇǫᴜᴇsᴛᴇᴅ</b>: {3}<tg-emoji emoji-id="5409194306365829029">❌</tg-emoji>\n<tg-emoji emoji-id="6089090515540644835">🛡️</tg-emoji>[𝛅 ⴕ ᧘ ᥧ 𝚱 𝛜 Ʀ](https://t.me/HEHE_STALKER)</blockquote>"
 stream_2 : "❍ <b>Sᴛʀᴇᴀᴍɪɴɢ Sᴛᴀʀᴛᴇᴅ </b>\n<b>❍ Sᴛʀᴇᴀᴍ ᴛʏᴘᴇ :</b> ʟɪᴠᴇ sᴛʀᴇᴀᴍ [ᴜʀʟ]\n<b>❍ Rᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {0}\n\n❖ ᴘᴏᴡᴇʀᴇᴅ ➥ [𝛅 ⴕ ᧘ ᥧ 𝚱 𝛜 Ʀ](https://t.me/HEHE_STALKER)"
 
 CLOSE_BUTTON  : "✧ ᴄʟᴏsᴇ ✧"
