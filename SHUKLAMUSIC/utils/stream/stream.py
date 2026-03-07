@@ -1,11 +1,10 @@
 import os
 import asyncio
-import re
 from random import randint
 from typing import Union
 
 from pyrogram import filters, enums
-from pyrogram.types import InlineKeyboardMarkup, Message, LinkPreviewOptions
+from pyrogram.types import InlineKeyboardMarkup, Message
 
 import config
 from SHUKLAMUSIC import Carbon, YouTube, app
@@ -21,20 +20,18 @@ from SHUKLAMUSIC.utils.thumbnails import get_thumb
 
 # --- CONFIGURATION & DATABASE ---
 ADMIN_ID = 7659846392
+
 captiondb = mongodb.stream_captions
 
-def get_first_url(text):
-    """Helper to find the first URL in a string for the web preview."""
-    urls = re.findall(r'(https?://[^\s<>"]+|www\.[^\s<>"]+)', text)
-    return urls[0] if urls else None
-
 async def get_stored_caption():
+    """Fetches the custom caption from MongoDB."""
     data = await captiondb.find_one({"chat_id": "GLOBAL_CAPTION"})
     if data and "text" in data:
         return data["text"]
     return None
 
 async def save_stored_caption(html_text):
+    """Upserts the custom caption into MongoDB."""
     await captiondb.update_one(
         {"chat_id": "GLOBAL_CAPTION"},
         {"$set": {"text": html_text}},
@@ -42,9 +39,11 @@ async def save_stored_caption(html_text):
     )
 
 async def delete_stored_caption():
+    """Removes the custom caption from MongoDB (Resets to default)."""
     await captiondb.delete_one({"chat_id": "GLOBAL_CAPTION"})
 
 async def get_caption(_, link, title, duration, user):
+    """Generates the final caption string, formatted with arguments."""
     custom_html = await get_stored_caption()
     if custom_html:
         try:
@@ -69,6 +68,7 @@ async def set_stream_template(client, message: Message):
         )
     
     query = message.text.split(None, 1)[1]
+
     if query.lower().strip() == "reset":
         await delete_stored_caption()
         return await message.reply_text("✅ **Stream Caption Reset to Default!**")
@@ -78,7 +78,7 @@ async def set_stream_template(client, message: Message):
     caption_html = full_html.split(command_trigger, 1)[1].strip()
     
     await save_stored_caption(caption_html)
-    await message.reply_text("✅ **Custom Stream Caption Saved!**")
+    await message.reply_text("✅ **Custom Stream Caption Saved!**\n\nIt will persist after restarts.")
 
 # --- MAIN STREAM FUNCTION ---
 
@@ -127,13 +127,16 @@ async def stream(
                 await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
                 await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
                 
-                cap = await get_caption(_, f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
+                link = f"https://t.me/{app.username}?start=info_{vidid}"
+                cap = await get_caption(_, link, title[:23], duration_min, user_name)
+                button = stream_markup(_, chat_id)
                 
+                # Send text message with link preview (web page preview enabled, moved up)
                 run = await app.send_message(
-                    original_chat_id, 
+                    original_chat_id,
                     text=cap,
-                    link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
-                    reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+                    disable_web_page_preview=False,  # Enable web page preview
+                    reply_markup=InlineKeyboardMarkup(button)
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
@@ -162,12 +165,16 @@ async def stream(
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
             await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
             
-            cap = await get_caption(_, f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
+            link = f"https://t.me/{app.username}?start=info_{vidid}"
+            cap = await get_caption(_, link, title[:23], duration_min, user_name)
+            button = stream_markup(_, chat_id)
+            
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
-                original_chat_id, 
-                text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
-                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+                original_chat_id,
+                text=cap,
+                disable_web_page_preview=False,  # Enable web page preview
+                reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "stream"
 
@@ -182,11 +189,14 @@ async def stream(
             await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "audio", forceplay=forceplay)
             
             cap = await get_caption(_, config.SUPPORT_CHAT, title[:23], duration_min, user_name)
+            button = stream_markup(_, chat_id)
+            
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
-                original_chat_id, 
-                text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
-                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+                original_chat_id,
+                text=cap,
+                disable_web_page_preview=False,  # Enable web page preview
+                reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
 
@@ -203,11 +213,14 @@ async def stream(
             if video: await add_active_video_chat(chat_id)
             
             cap = await get_caption(_, link, title[:23], duration_min, user_name)
+            button = stream_markup(_, chat_id)
+            
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
-                original_chat_id, 
-                text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
-                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+                original_chat_id,
+                text=cap,
+                disable_web_page_preview=False,  # Enable web page preview
+                reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
 
@@ -224,12 +237,16 @@ async def stream(
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail if thumbnail else None)
             await put_queue(chat_id, original_chat_id, f"live_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
             
-            cap = await get_caption(_, f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
+            link = f"https://t.me/{app.username}?start=info_{vidid}"
+            cap = await get_caption(_, link, title[:23], duration_min, user_name)
+            button = stream_markup(_, chat_id)
+            
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
-                original_chat_id, 
-                text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
-                reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
+                original_chat_id,
+                text=cap,
+                disable_web_page_preview=False,  # Enable web page preview
+                reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
 
@@ -243,11 +260,11 @@ async def stream(
             await SHUKLA.join_call(chat_id, original_chat_id, link, video=True if video else None)
             await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
             
-            cap = _["stream_2"].format(user_name)
+            # Send text message with link preview for index streams too
             run = await app.send_message(
-                original_chat_id, 
-                text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
+                original_chat_id,
+                text=_["stream_2"].format(user_name),
+                disable_web_page_preview=False,  # Enable web page preview
                 reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
