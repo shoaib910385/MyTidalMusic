@@ -29,7 +29,7 @@ API_KEY = getenv("API_KEY", None)
 
 # Limits and IDs
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 17000))
-LOGGER_ID = int(getenv("LOGGER_ID", -1002329141957))
+LOGGER_ID = int(os.getenv("LOGGER_ID"))
 OWNER_ID = int(getenv("OWNER_ID", 7659846392))
 
 # Heroku
