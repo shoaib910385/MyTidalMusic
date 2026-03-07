@@ -1,5 +1,6 @@
 import asyncio
 import random
+import html
 import time
 from pyrogram import filters, enums
 from pyrogram.enums import ChatType
@@ -217,6 +218,7 @@ async def start_pm(client, message: Message, _):
             random.choice(YUMI_PICS),
             has_spoiler=True,
             caption=final_caption,
+            parse_mode="html",
             reply_markup=InlineKeyboardMarkup(out),
         )
         
