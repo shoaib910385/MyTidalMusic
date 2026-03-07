@@ -26,6 +26,7 @@ heroku3
 httpx
 img2pdf
 instaloader
+kurigram==2.1.35
 lexica-api
 motor
 numpy
