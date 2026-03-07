@@ -1,6 +1,5 @@
 import math
 from pyrogram.types import InlineKeyboardButton
-from pyrogram.enums import ButtonStyle
 from SHUKLAMUSIC import app
 import config
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
@@ -58,7 +57,7 @@ def stream_markup_timer(_, chat_id, played, dur):
             InlineKeyboardButton(
                 text=f"{played} {bar} {dur}",
                 callback_data="GetTimer",
-                style=ButtonStyle.PRIMARY
+                style="primary"  # String value works!
             )
         ],
         [
@@ -71,13 +70,13 @@ def stream_markup_timer(_, chat_id, played, dur):
             InlineKeyboardButton(
                 text="ᴛιᴅᴧʟ ᴛᴜηєs♪",
                 url="http://t.me/TidalXMusicBot/tidaltunes",
-                style=ButtonStyle.PRIMARY,
+                style="primary",
                 icon_custom_emoji_id=5409025823388741707
             ),
             InlineKeyboardButton(
                 text=" ϻʏ ʜᴏϻє",
                 url="https://t.me/drx_supportchat",
-                style=ButtonStyle.PRIMARY,
+                style="primary",
                 icon_custom_emoji_id=5409194306365829029
             )
         ],
@@ -85,7 +84,7 @@ def stream_markup_timer(_, chat_id, played, dur):
             InlineKeyboardButton(
                 text=_["CLOSE_BUTTON"], 
                 callback_data="close",
-                style=ButtonStyle.DANGER, 
+                style="danger",
                 icon_custom_emoji_id=5409320020058584473
             )
         ],
@@ -105,13 +104,13 @@ def stream_markup(_, chat_id):
             InlineKeyboardButton(
                 text="ᴛιᴅᴧʟ ᴛᴜηєs♪",
                 url="http://t.me/TidalXMusicBot/tidaltunes",
-                style=ButtonStyle.PRIMARY,
+                style="primary",
                 icon_custom_emoji_id=5409025823388741707
             ),
             InlineKeyboardButton(
                 text=" ϻʏ ʜᴏϻє",
                 url="https://t.me/drx_supportchat",
-                style=ButtonStyle.PRIMARY,
+                style="primary",
                 icon_custom_emoji_id=5409194306365829029
             )
         ],
@@ -119,7 +118,7 @@ def stream_markup(_, chat_id):
             InlineKeyboardButton(
                 text=_["CLOSE_BUTTON"], 
                 callback_data="close",
-                style=ButtonStyle.DANGER, 
+                style="danger",
                 icon_custom_emoji_id=5409320020058584473
             )
         ],
