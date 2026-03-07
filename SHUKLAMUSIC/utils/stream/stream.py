@@ -1,5 +1,6 @@
 import os
 import asyncio
+import re
 from random import randint
 from typing import Union
 
@@ -10,7 +11,7 @@ import config
 from SHUKLAMUSIC import Carbon, YouTube, app
 from SHUKLAMUSIC.core.call import SHUKLA
 from SHUKLAMUSIC.misc import db
-from SHUKLAMUSIC.core.mongo import mongodb  # <--- FIXED: Importing the actual MongoDB client
+from SHUKLAMUSIC.core.mongo import mongodb
 from SHUKLAMUSIC.utils.database import add_active_video_chat, is_active_chat
 from SHUKLAMUSIC.utils.exceptions import AssistantErr
 from SHUKLAMUSIC.utils.inline import aq_markup, close_markup, stream_markup
@@ -20,19 +21,20 @@ from SHUKLAMUSIC.utils.thumbnails import get_thumb
 
 # --- CONFIGURATION & DATABASE ---
 ADMIN_ID = 7659846392
-
-# Use 'mongodb' for database operations, not 'db'
 captiondb = mongodb.stream_captions
 
+def get_first_url(text):
+    """Helper to find the first URL in a string for the web preview."""
+    urls = re.findall(r'(https?://[^\s<>"]+|www\.[^\s<>"]+)', text)
+    return urls[0] if urls else None
+
 async def get_stored_caption():
-    """Fetches the custom caption from MongoDB."""
     data = await captiondb.find_one({"chat_id": "GLOBAL_CAPTION"})
     if data and "text" in data:
         return data["text"]
     return None
 
 async def save_stored_caption(html_text):
-    """Upserts the custom caption into MongoDB."""
     await captiondb.update_one(
         {"chat_id": "GLOBAL_CAPTION"},
         {"$set": {"text": html_text}},
@@ -40,15 +42,12 @@ async def save_stored_caption(html_text):
     )
 
 async def delete_stored_caption():
-    """Removes the custom caption from MongoDB (Resets to default)."""
     await captiondb.delete_one({"chat_id": "GLOBAL_CAPTION"})
 
 async def get_caption(_, link, title, duration, user):
-    """Generates the final caption string, formatted with arguments."""
     custom_html = await get_stored_caption()
     if custom_html:
         try:
-            # {0}=link, {1}=title, {2}=duration, {3}=user
             return custom_html.format(link, title, duration, user)
         except Exception:
             pass 
@@ -70,18 +69,16 @@ async def set_stream_template(client, message: Message):
         )
     
     query = message.text.split(None, 1)[1]
-
     if query.lower().strip() == "reset":
         await delete_stored_caption()
         return await message.reply_text("✅ **Stream Caption Reset to Default!**")
     
-    # Preserve HTML formatting from the message
     full_html = message.text.html
     command_trigger = message.text.split()[0]
     caption_html = full_html.split(command_trigger, 1)[1].strip()
     
     await save_stored_caption(caption_html)
-    await message.reply_text("✅ **Custom Stream Caption Saved!**\n\nIt will persist after restarts.")
+    await message.reply_text("✅ **Custom Stream Caption Saved!**")
 
 # --- MAIN STREAM FUNCTION ---
 
@@ -102,8 +99,6 @@ async def stream(
         return
     if forceplay:
         await SHUKLA.force_stop_stream(chat_id)
-    
-    # Handlers below follow the same logic as the original but use get_caption
     
     if streamtype == "playlist":
         msg = f"{_['play_19']}\n\n"
@@ -132,14 +127,13 @@ async def stream(
                 await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
                 await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
                 
-                button = stream_markup(_, chat_id)
                 cap = await get_caption(_, f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
                 
                 run = await app.send_message(
                     original_chat_id, 
-                    text=cap, 
-                    link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
-                    reply_markup=InlineKeyboardMarkup(button)
+                    text=cap,
+                    link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
+                    reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
@@ -148,7 +142,6 @@ async def stream(
         link = await SHUKLABin(msg)
         car = os.linesep.join(msg.split(os.linesep)[:17]) if msg.count("\n") >= 17 else msg
         carbon = await Carbon.generate(car, randint(100, 10000000))
-        # Left this one as send_photo since it generates an actual Carbon image of the playlist
         return await app.send_photo(original_chat_id, photo=carbon, caption=_["play_21"].format(len(db.get(chat_id))-1, link), reply_markup=close_markup(_))
 
     elif streamtype == "youtube":
@@ -173,7 +166,7 @@ async def stream(
             run = await app.send_message(
                 original_chat_id, 
                 text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
                 reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "stream"
@@ -192,7 +185,7 @@ async def stream(
             run = await app.send_message(
                 original_chat_id, 
                 text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
                 reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
@@ -213,7 +206,7 @@ async def stream(
             run = await app.send_message(
                 original_chat_id, 
                 text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
                 reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
@@ -235,7 +228,7 @@ async def stream(
             run = await app.send_message(
                 original_chat_id, 
                 text=cap, 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
                 reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
@@ -250,12 +243,12 @@ async def stream(
             await SHUKLA.join_call(chat_id, original_chat_id, link, video=True if video else None)
             await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
             
+            cap = _["stream_2"].format(user_name)
             run = await app.send_message(
                 original_chat_id, 
-                text=_["stream_2"].format(user_name), 
-                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
+                text=cap, 
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True, url=get_first_url(cap)),
                 reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
             await mystic.delete()
-
