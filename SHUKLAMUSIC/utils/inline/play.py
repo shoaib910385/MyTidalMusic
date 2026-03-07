@@ -80,7 +80,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
             
 
-        [InlineKeyboardButton(text="▣ ᴄʟᴏsᴇ ▣", callback_data="close",style="danger", icon_custom_emoji_id="5409320020058584473")],
+        [InlineKeyboardButton(text="▣ ᴄʟᴏsᴇ ▣", callback_data="close")],
     ]
     return buttons
 
@@ -114,7 +114,7 @@ def stream_markup(_, chat_id):
         ],
             
 
-        [InlineKeyboardButton(text="▣ ᴄʟᴏsᴇ ▣", callback_data="close",style="danger", icon_custom_emoji_id="5409320020058584473")],
+        [InlineKeyboardButton(text="▣ ᴄʟᴏsᴇ ▣", callback_data="close",)],
     ]
     return buttons
 
