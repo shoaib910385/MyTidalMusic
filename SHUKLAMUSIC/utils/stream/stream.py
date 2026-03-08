@@ -136,7 +136,7 @@ async def stream(
                     original_chat_id,
                     text=cap,
                     disable_web_page_preview=False,  # Enable web page preview
-                    link_preview_options={"is_disabled": False, "show_above_text": True},  # Pyrogram v2.0+ syntax
+                    link_preview_options={"is_disabled": False, "show_above_text": False},  # Pyrogram v2.0+ syntax
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 db[chat_id][0]["mystic"] = run
@@ -175,7 +175,7 @@ async def stream(
                 original_chat_id,
                 text=cap,
                 disable_web_page_preview=False,
-                link_preview_options={"is_disabled": False, "show_above_text": True},  # Web preview above text
+                link_preview_options={"is_disabled": False, "show_above_text": False},  # Web preview above text
                 reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "stream"
@@ -198,7 +198,7 @@ async def stream(
                 original_chat_id,
                 text=cap,
                 disable_web_page_preview=False,
-                link_preview_options={"is_disabled": False, "show_above_text": True},  # Web preview above text
+                link_preview_options={"is_disabled": False, "show_above_text": False},  # Web preview above text
                 reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
