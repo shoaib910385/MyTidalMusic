@@ -16,7 +16,7 @@ import os
 from datetime import datetime, timedelta
 from typing import Union
 from pyrogram import Client
-from pyrogram.types import InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardMarkup, LinkPreviewOptions
 from pytgcalls import PyTgCalls, StreamType
 from pytgcalls.exceptions import (
     AlreadyJoinedError,
@@ -396,6 +396,10 @@ class Call(PyTgCalls):
                 db[chat_id][0]["speed_path"] = None
                 db[chat_id][0]["speed"] = 1.0
             video = True if str(streamtype) == "video" else False
+            
+            # Link preview settings for "above text" logic
+            preview_options = LinkPreviewOptions(is_disabled=False, show_above_text=True)
+
             if "live_" in queued:
                 n, link = await YouTube.video(videoid, True)
                 if n == 0:
@@ -429,7 +433,7 @@ class Call(PyTgCalls):
                 run = await app.send_message(
                     chat_id=original_chat_id,
                     text=cap,
-                    disable_web_page_preview=False,
+                    link_preview_options=preview_options,
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -445,7 +449,7 @@ class Call(PyTgCalls):
                     )
                 except:
                     return await mystic.edit_text(
-                        _["call_6"], disable_web_page_preview=True
+                        _["call_6"], link_preview_options=LinkPreviewOptions(is_disabled=True)
                     )
                 if video:
                     stream = AudioVideoPiped(
@@ -474,7 +478,7 @@ class Call(PyTgCalls):
                 run = await app.send_message(
                     chat_id=original_chat_id,
                     text=cap,
-                    disable_web_page_preview=False,
+                    link_preview_options=preview_options,
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -500,7 +504,7 @@ class Call(PyTgCalls):
                 run = await app.send_message(
                     chat_id=original_chat_id,
                     text=_["stream_2"].format(user),
-                    disable_web_page_preview=False,
+                    link_preview_options=preview_options,
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -531,7 +535,7 @@ class Call(PyTgCalls):
                     run = await app.send_message(
                         chat_id=original_chat_id,
                         text=cap,
-                        disable_web_page_preview=False,
+                        link_preview_options=preview_options,
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
@@ -543,7 +547,7 @@ class Call(PyTgCalls):
                     run = await app.send_message(
                         chat_id=original_chat_id,
                         text=cap,
-                        disable_web_page_preview=False,
+                        link_preview_options=preview_options,
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
@@ -556,7 +560,7 @@ class Call(PyTgCalls):
                     run = await app.send_message(
                         chat_id=original_chat_id,
                         text=cap,
-                        disable_web_page_preview=False,
+                        link_preview_options=preview_options,
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
