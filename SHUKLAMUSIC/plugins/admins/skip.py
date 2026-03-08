@@ -149,7 +149,7 @@ async def skip(cli, message: Message, _, chat_id):
         db[chat_id][0]["markup"] = "tg"
         
     elif "vid_" in queued:
-        mystic = await message.reply_text(_["call_7"], link_preview_options=LinkPreviewOptions(is_disabled=True))
+        mystic = await message.reply_text(_["call_7"], disable_web_page_preview=True)
         try:
             file_path, direct = await YouTube.download(
                 videoid,
