@@ -173,7 +173,8 @@ async def stream(
             run = await app.send_message(
                 original_chat_id,
                 text=cap,
-                disable_web_page_preview=False,  # Enable web page preview
+                disable_web_page_preview=False,
+                show_above_text=True,
                 reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "stream"
