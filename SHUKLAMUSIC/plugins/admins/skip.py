@@ -1,5 +1,5 @@
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardMarkup, Message, LinkPreviewOptions
 
 import config
 from SHUKLAMUSIC import YouTube, app
@@ -142,14 +142,14 @@ async def skip(cli, message: Message, _, chat_id):
         
         run = await message.reply_text(
             text=cap,
-            disable_web_page_preview=False,
+            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
             reply_markup=InlineKeyboardMarkup(button),
         )
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg"
         
     elif "vid_" in queued:
-        mystic = await message.reply_text(_["call_7"], disable_web_page_preview=True)
+        mystic = await message.reply_text(_["call_7"], link_preview_options=LinkPreviewOptions(is_disabled=True))
         try:
             file_path, direct = await YouTube.download(
                 videoid,
@@ -174,7 +174,7 @@ async def skip(cli, message: Message, _, chat_id):
         
         run = await message.reply_text(
             text=cap,
-            disable_web_page_preview=False,
+            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
             reply_markup=InlineKeyboardMarkup(button),
         )
         db[chat_id][0]["mystic"] = run
@@ -190,7 +190,7 @@ async def skip(cli, message: Message, _, chat_id):
         button = stream_markup(_, chat_id)
         run = await message.reply_text(
             text=_["stream_2"].format(user),
-            disable_web_page_preview=False,
+            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
             reply_markup=InlineKeyboardMarkup(button),
         )
         db[chat_id][0]["mystic"] = run
@@ -217,7 +217,7 @@ async def skip(cli, message: Message, _, chat_id):
             
             run = await message.reply_text(
                 text=cap,
-                disable_web_page_preview=False,
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -229,7 +229,7 @@ async def skip(cli, message: Message, _, chat_id):
             
             run = await message.reply_text(
                 text=cap,
-                disable_web_page_preview=False,
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -242,7 +242,7 @@ async def skip(cli, message: Message, _, chat_id):
             
             run = await message.reply_text(
                 text=cap,
-                disable_web_page_preview=False,
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
