@@ -4,7 +4,7 @@ from random import randint
 from typing import Union
 
 from pyrogram import filters, enums
-from pyrogram.types import InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardMarkup, Message, LinkPreviewOptions
 
 import config
 from SHUKLAMUSIC import Carbon, YouTube, app
@@ -131,12 +131,11 @@ async def stream(
                 cap = await get_caption(_, link, title[:23], duration_min, user_name)
                 button = stream_markup(_, chat_id)
                 
-                # Send text message with link preview ABOVE text
+                # Send text message with link preview (web page preview enabled, moved up)
                 run = await app.send_message(
                     original_chat_id,
                     text=cap,
-                    disable_web_page_preview=False,  # Enable web page preview
-                    link_preview_options={"is_disabled": False, "show_above_text": False},  # Pyrogram v2.0+ syntax
+                    link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 db[chat_id][0]["mystic"] = run
@@ -170,12 +169,11 @@ async def stream(
             cap = await get_caption(_, link, title[:23], duration_min, user_name)
             button = stream_markup(_, chat_id)
             
-            # Send text message with link preview ABOVE text
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
                 original_chat_id,
                 text=cap,
-                disable_web_page_preview=False,
-                link_preview_options={"is_disabled": False, "show_above_text": False},  # Web preview above text
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "stream"
@@ -193,12 +191,11 @@ async def stream(
             cap = await get_caption(_, config.SUPPORT_CHAT, title[:23], duration_min, user_name)
             button = stream_markup(_, chat_id)
             
-            # Send text message with link preview ABOVE text
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
                 original_chat_id,
                 text=cap,
-                disable_web_page_preview=False,
-                link_preview_options={"is_disabled": False, "show_above_text": False},  # Web preview above text
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
@@ -218,12 +215,11 @@ async def stream(
             cap = await get_caption(_, link, title[:23], duration_min, user_name)
             button = stream_markup(_, chat_id)
             
-            # Send text message with link preview ABOVE text
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
                 original_chat_id,
                 text=cap,
-                disable_web_page_preview=False,
-                link_preview_options={"is_disabled": False, "show_above_text": True},  # Web preview above text
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
@@ -245,12 +241,11 @@ async def stream(
             cap = await get_caption(_, link, title[:23], duration_min, user_name)
             button = stream_markup(_, chat_id)
             
-            # Send text message with link preview ABOVE text
+            # Send text message with link preview (web page preview enabled, moved up)
             run = await app.send_message(
                 original_chat_id,
                 text=cap,
-                disable_web_page_preview=False,
-                link_preview_options={"is_disabled": False, "show_above_text": True},  # Web preview above text
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(button)
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
@@ -265,12 +260,11 @@ async def stream(
             await SHUKLA.join_call(chat_id, original_chat_id, link, video=True if video else None)
             await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
             
-            # Send text message with link preview ABOVE text
+            # Send text message with link preview for index streams too
             run = await app.send_message(
                 original_chat_id,
                 text=_["stream_2"].format(user_name),
-                disable_web_page_preview=False,
-                link_preview_options={"is_disabled": False, "show_above_text": True},  # Web preview above text
+                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True),
                 reply_markup=InlineKeyboardMarkup(stream_markup(_, chat_id))
             )
             db[chat_id][0]["mystic"], db[chat_id][0]["markup"] = run, "tg"
