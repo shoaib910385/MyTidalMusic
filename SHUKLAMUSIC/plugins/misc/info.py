@@ -125,14 +125,16 @@ async def userinfo(_, message):
             bio = user_info.bio if user_info.bio else "No bio set"
             
             if user.photo:
-                # User has a profile photo
                 welcome_photo = random.choice(random_photo)
             else:
-                # User doesn't have a profile photo, use random_photo directly
                 welcome_photo = random.choice(random_photo)
                 
-            await app.send_photo(chat_id, photo=welcome_photo, caption=INFO_TEXT.format(
+            sent_message = await app.send_photo(chat_id, photo=welcome_photo, caption=INFO_TEXT.format(
                 id, first_name, last_name, username, mention, status, dc_id, bio), reply_to_message_id=message.id)
+            
+            await sleep(30)
+            await sent_message.delete()
+            
         except Exception as e:
             await message.reply_text(str(e))        
       
@@ -150,16 +152,17 @@ async def userinfo(_, message):
             bio = user_info.bio if user_info.bio else "No bio set"
             
             if user.photo:
-                # User has a profile photo
                 photo = await app.download_media(user.photo.big_file_id)
                 welcome_photo = random.choice(random_photo)
-                
             else:
-                # User doesn't have a profile photo, use random_photo directly
                 welcome_photo = random.choice(random_photo)
                 
-            await app.send_photo(chat_id, photo=welcome_photo, caption=INFO_TEXT.format(
+            sent_message = await app.send_photo(chat_id, photo=welcome_photo, caption=INFO_TEXT.format(
                 id, first_name, last_name, username, mention, status, dc_id, bio), reply_to_message_id=message.id)
+            
+            await sleep(30)
+            await sent_message.delete()
+            
         except Exception as e:
             await message.reply_text(str(e))
 
@@ -178,7 +181,6 @@ async def userinfo(_, message):
             bio = user_info.bio if user_info.bio else "No bio set"
             
             if user.photo:
-                # User has a profile photo
                 photo = await app.download_media(user.photo.big_file_id)
                 welcome_photo = await get_userinfo_img(
                     bg_path=bg_path,
@@ -187,11 +189,13 @@ async def userinfo(_, message):
                     profile_path=photo,
                 )
             else:
-                # User doesn't have a profile photo, use random_photo directly
                 welcome_photo = random.choice(random_photo)
                 
-            await app.send_photo(chat_id, photo=welcome_photo, caption=INFO_TEXT.format(
+            sent_message = await app.send_photo(chat_id, photo=welcome_photo, caption=INFO_TEXT.format(
                 id, first_name, last_name, username, mention, status, dc_id, bio), reply_to_message_id=message.id)
+            
+            await sleep(30)
+            await sent_message.delete()
+            
         except Exception as e:
             await message.reply_text(str(e))
-                
