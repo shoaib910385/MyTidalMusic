@@ -91,11 +91,11 @@ async def ton_price_command(client, message: Message):
         draw.text((585, 475), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
 
         # Draw Weekly Change in light pink - positioned in second pill (white area in image 5)
-        draw.text((900, 475), weekly_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+        draw.text((945, 475), weekly_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
 
         # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
-        start_x, spacing_x, y_coord = 110, 115, 845
+        start_x, spacing_x, y_coord = 110, 170, 845
 
         for i in range(8):
             date_calc = today - timedelta(days=(7-i))
