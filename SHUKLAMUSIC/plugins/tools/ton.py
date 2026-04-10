@@ -63,8 +63,8 @@ async def ton_price_command(client, message: Message):
 
         try:
             # Adjust sizes to fit your image resolution
-            font_price = ImageFont.truetype(FONT_PATH, 95)
-            font_change = ImageFont.truetype(FONT_PATH, 52)
+            font_price = ImageFont.truetype(FONT_PATH, 86)
+            font_change = ImageFont.truetype(FONT_PATH, 58)
             font_dates = ImageFont.truetype(FONT_PATH, 34)
         except Exception as e:
             await msg.edit_text(f"❌ **Error loading font:** {str(e)}")
@@ -95,7 +95,7 @@ async def ton_price_command(client, message: Message):
 
         # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
-        start_x, spacing_x, y_coord = 110, 170, 845
+        start_x, spacing_x, y_coord = 125, 175, 845
 
         for i in range(8):
             date_calc = today - timedelta(days=(7-i))
