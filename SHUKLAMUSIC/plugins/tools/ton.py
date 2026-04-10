@@ -95,7 +95,7 @@ async def ton_price_command(client, message: Message):
 
         # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
-        start_x, spacing_x, y_coord = 135, 177, 870
+        start_x, spacing_x, y_coord = 140, 176, 875
 
         for i in range(8):
             date_calc = today - timedelta(days=(7-i))
@@ -114,7 +114,7 @@ async def ton_price_command(client, message: Message):
             f'<b><u>TON PRICES <tg-emoji emoji-id="5778421276024509124">💰</tg-emoji></u>:</b>\n'
             f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ${usd_price}\n'
             f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ₹{inr_price}\n\n'
-            f'<blockquote><b><u>USD Changes</u>:<tg-emoji emoji-id="5345889288741461772">💰</tg-emoji></b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
+            f'<blockquote expandable><b><u>USD Changes</u>:<tg-emoji emoji-id="5345889288741461772">💰</tg-emoji></b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
             f'<b><u>INR Changes</u>:</b>\n24h: {inr_24h}\n7d: {inr_7d}\n30d: {inr_30d}</blockquote>\n'
             f'<blockquote>ʙʏ : @hehe_stalker</blockquote>'
         )
