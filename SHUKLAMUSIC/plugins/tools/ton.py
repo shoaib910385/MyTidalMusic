@@ -1,5 +1,6 @@
 import aiohttp
 import io
+import os
 import traceback
 from datetime import datetime, timedelta
 from pyrogram import filters
@@ -7,6 +8,11 @@ from pyrogram.enums import ParseMode
 from pyrogram.types import Message
 from PIL import Image, ImageDraw, ImageFont
 from SHUKLAMUSIC import app
+
+# Automatically detect the folder where ton.py is located
+current_dir = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_PATH = os.path.join(current_dir, "base_template.png")
+FONT_PATH = os.path.join(current_dir, "Poppins-Bold.ttf")
 
 @app.on_message(filters.command("ton"))
 async def ton_price_command(client, message: Message):
@@ -39,37 +45,52 @@ async def ton_price_command(client, message: Message):
         inr_30d = ton_inr["diff_30d"]["INR"]
 
         # --- IMAGE GENERATION ---
+        if not os.path.exists(TEMPLATE_PATH):
+            await msg.edit_text(f"❌ **Template not found!**\nPath checked: `{TEMPLATE_PATH}`")
+            return
+
         try:
-            img = Image.open("base_template.png")
-        except Exception:
-            await msg.edit_text("❌ **Failed to load base_template.png.**")
+            img = Image.open(TEMPLATE_PATH)
+        except Exception as e:
+            await msg.edit_text(f"❌ **Error opening image:** {str(e)}")
             return
 
         draw = ImageDraw.Draw(img)
 
-        try:
-            font_price = ImageFont.truetype("Poppins-Bold.ttf", 90)
-            font_change = ImageFont.truetype("Poppins-Bold.ttf", 40)
-            font_dates = ImageFont.truetype("Poppins-Bold.ttf", 20)
-        except Exception:
-            await msg.edit_text("❌ **Poppins-Bold.ttf missing.**")
+        if not os.path.exists(FONT_PATH):
+            await msg.edit_text(f"❌ **Font not found!**\nPath checked: `{FONT_PATH}`")
             return
 
+        try:
+            # Adjust sizes to fit your image resolution
+            font_price = ImageFont.truetype(FONT_PATH, 95)
+            font_change = ImageFont.truetype(FONT_PATH, 42)
+            font_dates = ImageFont.truetype(FONT_PATH, 22)
+        except Exception as e:
+            await msg.edit_text(f"❌ **Error loading font:** {str(e)}")
+            return
+
+        # Formatting text for overlay
         price_text = f"${usd_price:.4f}"
         daily_text = f"{'+' if usd_24h > 0 else ''}{usd_24h}%"
         weekly_text = f"{'+' if usd_7d > 0 else ''}{usd_7d}%"
 
+        # Colors
         color_green = (11, 209, 44)
         color_red = (255, 59, 48)
         daily_color = color_green if usd_24h >= 0 else color_red
         weekly_color = color_green if usd_7d >= 0 else color_red
 
-        # Coordinates (Adjust X, Y to fit your image perfectly)
-        draw.text((80, 240), price_text, font=font_price, fill=(255, 255, 255))
-        draw.text((383, 465), daily_text, font=font_change, fill=daily_color, anchor="mm")
-        draw.text((635, 465), weekly_text, font=font_change, fill=weekly_color, anchor="mm")
+        # Draw main price
+        draw.text((90, 260), price_text, font=font_price, fill=(255, 255, 255))
+        
+        # Draw Daily Change in first pill
+        draw.text((385, 470), daily_text, font=font_change, fill=daily_color, anchor="mm")
+        
+        # Draw Weekly Change in second pill
+        draw.text((635, 470), weekly_text, font=font_change, fill=weekly_color, anchor="mm")
 
-        # Dynamic Dates at bottom
+        # Draw Bottom Dates (last 8 days)
         today = datetime.now()
         start_x, spacing_x, y_coord = 110, 115, 845
         
@@ -77,8 +98,9 @@ async def ton_price_command(client, message: Message):
             date_calc = today - timedelta(days=(7-i))
             date_str = date_calc.strftime("%b. %d")
             x_coord = start_x + (i * spacing_x)
-            draw.text((x_coord, y_coord), date_str, font=font_dates, fill=(150, 150, 150), anchor="mm")
+            draw.text((x_coord, y_coord), date_str, font=font_dates, fill=(160, 160, 160), anchor="mm")
 
+        # Save to memory
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
         img_byte_arr.seek(0)
@@ -99,4 +121,4 @@ async def ton_price_command(client, message: Message):
 
     except Exception:
         error_traceback = traceback.format_exc()
-        await msg.edit_text(f"❌ **Error occurred:**\n\n<pre>{error_traceback}</pre>", parse_mode=ParseMode.HTML)
+        await msg.edit_text(f"❌ **Critical Error:**\n\n<pre>{error_traceback}</pre>", parse_mode=ParseMode.HTML)
