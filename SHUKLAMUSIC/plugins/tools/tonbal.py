@@ -84,8 +84,8 @@ async def bal_command(client, message: Message):
 
         try:
             # Adjust sizes based on your exact image resolution if necessary
-            font_title = ImageFont.truetype(FONT_PATH, 65)
-            font_values = ImageFont.truetype(FONT_PATH, 55)
+            font_title = ImageFont.truetype(FONT_PATH, 90)
+            font_values = ImageFont.truetype(FONT_PATH, 78)
         except Exception as e:
             return await msg.edit_text(f"❌ **Error loading font:** {str(e)}")
 
@@ -102,14 +102,14 @@ async def bal_command(client, message: Message):
 
         # Draw Right-Aligned Values (TON, USD, INR)
         # Note: You might need to tweak the Y coordinates (320, 520, 720) depending on your actual template's layout.
-        right_align_x = img_width - 150
+        right_align_x = img_width - 120
         
         # TON Value
-        draw.text((right_align_x, 320), ton_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 360), ton_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # USD Value
-        draw.text((right_align_x, 520), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 600), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # INR Value
-        draw.text((right_align_x, 720), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 840), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
 
         # Save to memory
         img_byte_arr = io.BytesIO()
@@ -119,11 +119,11 @@ async def bal_command(client, message: Message):
         
         # --- CAPTION GENERATION ---
         text = (
-            f"<b>{display_name} 's balance</b>\n\n"
+            f"<b>{display_name} 's balance</b>\n"
             f"<blockquote expandable><b>TON:</b> {ton_str}\n"
             f"<b>USD:</b> {usd_str}\n"
             f"<b>INR:</b> {inr_str}\n"
-            f"</blockquote>"
+            f"</blockquote>\n<blockquote>• ʙʏ : @hehe_stalker</blockquote>"
         )
 
         await message.reply_photo(photo=img_byte_arr, caption=text, parse_mode=ParseMode.HTML)
