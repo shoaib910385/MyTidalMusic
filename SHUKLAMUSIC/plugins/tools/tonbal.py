@@ -85,7 +85,7 @@ async def bal_command(client, message: Message):
         try:
             # Adjust sizes based on your exact image resolution if necessary
             font_title = ImageFont.truetype(FONT_PATH, 190)
-            font_values = ImageFont.truetype(FONT_PATH, 150)
+            font_values = ImageFont.truetype(FONT_PATH, 170)
         except Exception as e:
             return await msg.edit_text(f"❌ **Error loading font:** {str(e)}")
 
@@ -98,18 +98,18 @@ async def bal_command(client, message: Message):
 
         # Draw Top Middle Title text
         title_text = f"{display_name}'s Balance"
-        draw.text((img_width / 2, 350), title_text, font=font_title, fill=WHITE, anchor="mt")
+        draw.text((img_width / 2, 170), title_text, font=font_title, fill=WHITE, anchor="mt")
 
         # Draw Right-Aligned Values (TON, USD, INR)
         # Note: You might need to tweak the Y coordinates (320, 520, 720) depending on your actual template's layout.
         right_align_x = img_width - 360
         
         # TON Value
-        draw.text((right_align_x, 360), ton_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 810), ton_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # USD Value
-        draw.text((right_align_x, 610), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 1100), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # INR Value
-        draw.text((right_align_x, 850), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 1500), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
 
         # Save to memory
         img_byte_arr = io.BytesIO()
