@@ -102,14 +102,14 @@ async def bal_command(client, message: Message):
 
         # Draw Right-Aligned Values (TON, USD, INR)
         # Note: You might need to tweak the Y coordinates (320, 520, 720) depending on your actual template's layout.
-        right_align_x = img_width - 360
+        right_align_x = img_width - 376
         
         # TON Value
         draw.text((right_align_x, 810), ton_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # USD Value
-        draw.text((right_align_x, 1100), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 1140), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # INR Value
-        draw.text((right_align_x, 1500), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 1550), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
 
         # Save to memory
         img_byte_arr = io.BytesIO()
