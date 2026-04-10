@@ -16,15 +16,20 @@ async def ton_price_command(client, message: Message):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://tonapi.io/v2/rates?tokens=ton&currencies=usd") as resp_usd:
                 usd_data = await resp_usd.json()
-                
             async with session.get("https://tonapi.io/v2/rates?tokens=ton&currencies=inr") as resp_inr:
                 inr_data = await resp_inr.json()
         
-        # Parse and convert to float before rounding
+        # Helper function to clean strings like '+3.05%' into floats
+        def clean_float(value):
+            if isinstance(value, str):
+                return float(value.replace('%', '').replace('+', '').strip())
+            return float(value)
+
+        # Parse and convert
         ton_usd = usd_data["rates"]["TON"]
         usd_price = round(float(ton_usd["prices"]["USD"]), 4) 
-        usd_24h = round(float(ton_usd["diff_24h"]["USD"]), 2)
-        usd_7d = round(float(ton_usd["diff_7d"]["USD"]), 2)
+        usd_24h = round(clean_float(ton_usd["diff_24h"]["USD"]), 2)
+        usd_7d = round(clean_float(ton_usd["diff_7d"]["USD"]), 2)
         usd_30d = ton_usd["diff_30d"]["USD"]
 
         ton_inr = inr_data["rates"]["TON"]
@@ -37,18 +42,17 @@ async def ton_price_command(client, message: Message):
         try:
             img = Image.open("base_template.png")
         except Exception:
-            await msg.edit_text("❌ **Failed to load base_template.png.** Make sure it's in the bot folder.")
+            await msg.edit_text("❌ **Failed to load base_template.png.**")
             return
 
         draw = ImageDraw.Draw(img)
 
         try:
-            # Adjust sizes to match your template resolution
             font_price = ImageFont.truetype("Poppins-Bold.ttf", 90)
             font_change = ImageFont.truetype("Poppins-Bold.ttf", 40)
             font_dates = ImageFont.truetype("Poppins-Bold.ttf", 20)
         except Exception:
-            await msg.edit_text("❌ **Poppins-Bold.ttf missing.** Please add the font file to the bot folder.")
+            await msg.edit_text("❌ **Poppins-Bold.ttf missing.**")
             return
 
         price_text = f"${usd_price:.4f}"
@@ -60,14 +64,14 @@ async def ton_price_command(client, message: Message):
         daily_color = color_green if usd_24h >= 0 else color_red
         weekly_color = color_green if usd_7d >= 0 else color_red
 
-        # Coordinate adjustments might be needed based on your image size
-        draw.text((100, 200), price_text, font=font_price, fill=(255, 255, 255))
-        draw.text((380, 450), daily_text, font=font_change, fill=daily_color, anchor="mm")
-        draw.text((640, 450), weekly_text, font=font_change, fill=weekly_color, anchor="mm")
+        # Coordinates (Adjust X, Y to fit your image perfectly)
+        draw.text((80, 240), price_text, font=font_price, fill=(255, 255, 255))
+        draw.text((383, 465), daily_text, font=font_change, fill=daily_color, anchor="mm")
+        draw.text((635, 465), weekly_text, font=font_change, fill=weekly_color, anchor="mm")
 
-        # Dynamic Dates
+        # Dynamic Dates at bottom
         today = datetime.now()
-        start_x, spacing_x, y_coord = 110, 120, 750
+        start_x, spacing_x, y_coord = 110, 115, 845
         
         for i in range(8):
             date_calc = today - timedelta(days=(7-i))
@@ -82,11 +86,11 @@ async def ton_price_command(client, message: Message):
 
         # --- CAPTION ---
         text = (
-            f"<b><u>TON PRICES</u>:</b>\n"
+            f"<b>TON PRICES:</b>\n"
             f"1 TON = ${usd_price}\n"
             f"1 TON = ₹{inr_price}\n\n"
-            f"<blockquote><b><u>USD Changes:</u></b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%</blockquote>"
-            f"<blockquote expandable><b><u>INR Changes:</u></b>\n24h: {inr_24h}%\n7d: {inr_7d}%\n30d: {inr_30d}%</blockquote>"
+            f"<blockquote><b>USD Changes:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%</blockquote>"
+            f"<blockquote expandable><b>INR Changes:</b>\n24h: {inr_24h}%\n7d: {inr_7d}%\n30d: {inr_30d}%</blockquote>"
             f"<blockquote>ʙʏ : @hehe_stalker</blockquote>"
         )
 
