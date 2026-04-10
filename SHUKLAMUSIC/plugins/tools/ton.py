@@ -7,7 +7,7 @@ from pyrogram.types import Message
 from PIL import Image, ImageDraw, ImageFont
 from SHUKLAMUSIC import app
 
-@app.on_message(filters.command("ton", "priceton", "toncoin"))
+@app.on_message(filters.command("ton"))
 async def ton_price_command(client, message: Message):
     # Send a waiting message while fetching data
     msg = await message.reply_text("Fetching latest TON prices and generating image...")
@@ -101,27 +101,18 @@ async def ton_price_command(client, message: Message):
         # ==========================================
 
         text = (
-            f"<b>TON PRICES:</b>\n"
+            f"<b><u>TON PRICES:</u></b>\n"
             f"1 TON = ${usd_price}\n"
             f"1 TON = ₹{inr_price}\n\n"
-            
-            f"<blockquote>"
-            f"<b>USD Changes:</b>\n"
+            f"<blockquote>"f"<b><u>USD Changes:</u></b>\n"
             f"24h: {usd_24h}%\n"
             f"7d: {usd_7d}%\n"
-            f"30d: {usd_30d}%\n"
-            f"</blockquote>"
-            
-            f"<blockquote expandable>"
-            f"<b>INR Changes:</b>\n"
+            f"30d: {usd_30d}%\n</blockquote>"
+            f"<blockquote expandable><b><u>INR Changes:</u></b>\n"
             f"24h: {inr_24h}%\n"
             f"7d: {inr_7d}%\n"
-            f"30d: {inr_30d}%\n"
-            f"</blockquote>"
-            
-            f"<blockquote>"
-            f"ʙʏ : @hehe_stalker"
-            f"</blockquote>"
+            f"30d: {inr_30d}%\n</blockquote>"
+            f"<blockquote>ʙʏ : @hehe_stalker</blockquote>"
         )
 
         # Send photo and delete the "fetching" message
