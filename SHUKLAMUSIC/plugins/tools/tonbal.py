@@ -105,11 +105,11 @@ async def bal_command(client, message: Message):
         right_align_x = img_width - 376
         
         # TON Value
-        draw.text((right_align_x, 810), ton_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 800), ton_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # USD Value
-        draw.text((right_align_x, 1140), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 1190), usd_str, font=font_values, fill=DARK_GREY, anchor="rm")
         # INR Value
-        draw.text((right_align_x, 1550), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
+        draw.text((right_align_x, 1600), inr_str, font=font_values, fill=DARK_GREY, anchor="rm")
 
         # Save to memory
         img_byte_arr = io.BytesIO()
