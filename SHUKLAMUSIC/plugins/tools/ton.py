@@ -110,28 +110,16 @@ async def ton_price_command(client, message: Message):
         img_byte_arr.seek(0)
         img_byte_arr.name = "ton_stats.png"
         
-        entities = [
-            MessageEntity(type="custom_emoji", offset=12, length=2, custom_emoji_id="5778421276024509124"),
-            MessageEntity(type="custom_emoji", offset=22, length=2, custom_emoji_id="5778421276024509124"),
-            MessageEntity(type="custom_emoji", offset=65, length=2, custom_emoji_id="5345889288741461772"),
-        ]
         text = (
-            f'<b><u>TON PRICES 💰:</u></b>\n'
-            f'💰1 TON = ${usd_price}\n'
-            f'💰1 TON = ₹{inr_price}\n\n'
-            f'<blockquote expandable><b><u>USD Changes</u>:💰</b>\n'
-            f'24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
+            f'<b><u>TON PRICES <tg-emoji emoji-id="5778421276024509124">💰</tg-emoji></u>:</b>\n'
+            f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ${usd_price}\n'
+            f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ₹{inr_price}\n\n'
+            f'<blockquote expandable><b><u>USD Changes</u>:<tg-emoji emoji-id="5345889288741461772">💰</tg-emoji></b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
             f'<b><u>INR Changes</u>:</b>\n24h: {inr_24h}\n7d: {inr_7d}\n30d: {inr_30d}</blockquote>\n'
             f'<blockquote>ʙʏ : @hehe_stalker</blockquote>'
         )
-        await message.reply_photo(
-            photo=img_byte_arr, 
-            caption=text, 
-            parse_mode=ParseMode.HTML,
-            caption_entities=entities  # <-- Add this!
-        )
 
-
+        await message.reply_photo(photo=img_byte_arr, caption=text, parse_mode=ParseMode.HTML)
         await msg.delete()
 
     except Exception:
