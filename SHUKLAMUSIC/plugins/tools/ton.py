@@ -64,8 +64,8 @@ async def ton_price_command(client, message: Message):
         try:
             # Adjust sizes to fit your image resolution
             font_price = ImageFont.truetype(FONT_PATH, 95)
-            font_change = ImageFont.truetype(FONT_PATH, 42)
-            font_dates = ImageFont.truetype(FONT_PATH, 22)
+            font_change = ImageFont.truetype(FONT_PATH, 52)
+            font_dates = ImageFont.truetype(FONT_PATH, 34)
         except Exception as e:
             await msg.edit_text(f"❌ **Error loading font:** {str(e)}")
             return
@@ -81,17 +81,17 @@ async def ton_price_command(client, message: Message):
         LIGHT_PINK = (255, 182, 193) # Light pink #FFB6C1 for daily and weekly changes
 
         # Draw $ sign in sky blue (position from image 5 - sky blue area)
-        draw.text((110, 240), "$", font=font_price, fill=SKY_BLUE)
+        draw.text((145, 230), "$", font=font_price, fill=SKY_BLUE)
 
         # Draw USD amount in white (right after $ sign)
         # Offset x by ~50 pixels to position after the $
-        draw.text((165, 240), price_text, font=font_price, fill=WHITE)
+        draw.text((205, 230), price_text, font=font_price, fill=WHITE)
 
         # Draw Daily Change in light pink - positioned in first pill (red area in image 5)
-        draw.text((585, 470), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+        draw.text((585, 475), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
 
         # Draw Weekly Change in light pink - positioned in second pill (white area in image 5)
-        draw.text((835, 470), weekly_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+        draw.text((900, 475), weekly_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
 
         # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
