@@ -81,17 +81,17 @@ async def ton_price_command(client, message: Message):
         LIGHT_PINK = (255, 182, 193) # Light pink #FFB6C1 for daily and weekly changes
 
         # Draw $ sign in sky blue (position from image 5 - sky blue area)
-        draw.text((90, 260), "$", font=font_price, fill=SKY_BLUE)
+        draw.text((110, 240), "$", font=font_price, fill=SKY_BLUE)
 
         # Draw USD amount in white (right after $ sign)
         # Offset x by ~50 pixels to position after the $
-        draw.text((145, 260), price_text, font=font_price, fill=WHITE)
+        draw.text((165, 240), price_text, font=font_price, fill=WHITE)
 
         # Draw Daily Change in light pink - positioned in first pill (red area in image 5)
-        draw.text((385, 470), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+        draw.text((585, 470), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
 
         # Draw Weekly Change in light pink - positioned in second pill (white area in image 5)
-        draw.text((635, 470), weekly_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+        draw.text((835, 470), weekly_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
 
         # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
@@ -114,8 +114,8 @@ async def ton_price_command(client, message: Message):
             f"<b><u>TON PRICES</u>:</b>\n"
             f"1 TON = ${usd_price}\n"
             f"1 TON = ₹{inr_price}\n\n"
-            f"<blockquote><b><u>USD Changes</u>:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%</blockquote>"
-            f"<blockquote expandable><b><u>INR Changes</u>:</b>\n24h: {inr_24h}%\n7d: {inr_7d}%\n30d: {inr_30d}%</blockquote>"
+            f"<blockquote><b><u>USD Changes</u>:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%</blockquote>\n"
+            f"<blockquote expandable><b><u>INR Changes</u>:</b>\n24h: {inr_24h}\n7d: {inr_7d}\n30d: {inr_30d}</blockquote>\n"
             f"<blockquote>ʙʏ : @hehe_stalker</blockquote>"
         )
 
