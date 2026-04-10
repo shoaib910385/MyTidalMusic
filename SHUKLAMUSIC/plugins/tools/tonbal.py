@@ -112,7 +112,7 @@ async def bal_command(client, message: Message):
             f"<blockquote>• ʙʏ : @hehe_stalker</blockquote>"
         )
 
-        await message.reply_photo(photo=img_byte_arr, caption=caption, parse_mode=ParseMode.HTML)
+        await message.reply_photo(photo=img_byte_arr, has_spoiler=True, caption=caption, parse_mode=ParseMode.HTML)
         await msg.delete()
 
     except Exception:
