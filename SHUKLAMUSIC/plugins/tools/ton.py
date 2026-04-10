@@ -17,7 +17,7 @@ FONT_PATH = os.path.join(current_dir, "Poppins-Bold.ttf")
 
 @app.on_message(filters.command("ton"))
 async def ton_price_command(client, message: Message):
-    msg = await message.reply_text("⏳ Fetching latest TON prices and generating image...")
+    msg = await message.reply_text("⏳ Fetching latest TON prices using drxAPI")
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -66,7 +66,7 @@ async def ton_price_command(client, message: Message):
             # Adjust sizes to fit your image resolution
             font_price = ImageFont.truetype(FONT_PATH, 86)
             font_change = ImageFont.truetype(FONT_PATH, 60)
-            font_dates = ImageFont.truetype(FONT_PATH, 30)
+            font_dates = ImageFont.truetype(FONT_PATH, 28)
         except Exception as e:
             await msg.edit_text(f"❌ **Error loading font:** {str(e)}")
             return
@@ -96,7 +96,7 @@ async def ton_price_command(client, message: Message):
 
         # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
-        start_x, spacing_x, y_coord = 140, 176, 875
+        start_x, spacing_x, y_coord = 145, 177, 875
 
         for i in range(8):
             date_calc = today - timedelta(days=(7-i))
@@ -111,7 +111,7 @@ async def ton_price_command(client, message: Message):
         img_byte_arr.name = "ton_stats.png"
         
         text = (
-            f'<b><u>TON PRICES <tg-emoji emoji-id="5778421276024509124">💰</tg-emoji></u>:</b>\n'
+            f'<b><u>TON PRICES</u>:</b>\n'
             f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ${usd_price}\n'
             f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ₹{inr_price}\n\n'
             f'<blockquote expandable><b><u>USD Changes</u>:<tg-emoji emoji-id="5345889288741461772">💰</tg-emoji></b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
