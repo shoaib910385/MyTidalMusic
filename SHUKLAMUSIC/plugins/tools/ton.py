@@ -17,14 +17,14 @@ FONT_PATH = os.path.join(current_dir, "Poppins-Bold.ttf")
 @app.on_message(filters.command("ton"))
 async def ton_price_command(client, message: Message):
     msg = await message.reply_text("⏳ Fetching latest TON prices and generating image...")
-    
+
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get("https://tonapi.io/v2/rates?tokens=ton&currencies=usd") as resp_usd:
                 usd_data = await resp_usd.json()
             async with session.get("https://tonapi.io/v2/rates?tokens=ton&currencies=inr") as resp_inr:
                 inr_data = await resp_inr.json()
-        
+
         # Helper function to clean strings like '+3.05%' into floats
         def clean_float(value):
             if isinstance(value, str):
@@ -71,29 +71,32 @@ async def ton_price_command(client, message: Message):
             return
 
         # Formatting text for overlay
-        price_text = f"${usd_price:.4f}"
+        price_text = f"{usd_price:.4f}"
         daily_text = f"{'+' if usd_24h > 0 else ''}{usd_24h}%"
         weekly_text = f"{'+' if usd_7d > 0 else ''}{usd_7d}%"
 
-        # Colors
-        color_green = (11, 209, 44)
-        color_red = (255, 59, 48)
-        daily_color = color_green if usd_24h >= 0 else color_red
-        weekly_color = color_green if usd_7d >= 0 else color_red
+        # Colors - Updated as requested
+        SKY_BLUE = (135, 206, 235)   # Sky blue for $ sign
+        WHITE = (255, 255, 255)      # White for USD amount
+        LIGHT_PINK = (255, 182, 193) # Light pink #FFB6C1 for daily and weekly changes
 
-        # Draw main price
-        draw.text((90, 260), price_text, font=font_price, fill=(255, 255, 255))
-        
-        # Draw Daily Change in first pill
-        draw.text((385, 470), daily_text, font=font_change, fill=daily_color, anchor="mm")
-        
-        # Draw Weekly Change in second pill
-        draw.text((635, 470), weekly_text, font=font_change, fill=weekly_color, anchor="mm")
+        # Draw $ sign in sky blue (position from image 5 - sky blue area)
+        draw.text((90, 260), "$", font=font_price, fill=SKY_BLUE)
 
-        # Draw Bottom Dates (last 8 days)
+        # Draw USD amount in white (right after $ sign)
+        # Offset x by ~50 pixels to position after the $
+        draw.text((145, 260), price_text, font=font_price, fill=WHITE)
+
+        # Draw Daily Change in light pink - positioned in first pill (red area in image 5)
+        draw.text((385, 470), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+
+        # Draw Weekly Change in light pink - positioned in second pill (white area in image 5)
+        draw.text((635, 470), weekly_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+
+        # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
         start_x, spacing_x, y_coord = 110, 115, 845
-        
+
         for i in range(8):
             date_calc = today - timedelta(days=(7-i))
             date_str = date_calc.strftime("%b. %d")
@@ -108,11 +111,11 @@ async def ton_price_command(client, message: Message):
 
         # --- CAPTION ---
         text = (
-            f"<b>TON PRICES:</b>\n"
+            f"<b><u>TON PRICES</u>:</b>\n"
             f"1 TON = ${usd_price}\n"
             f"1 TON = ₹{inr_price}\n\n"
-            f"<blockquote><b>USD Changes:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%</blockquote>"
-            f"<blockquote expandable><b>INR Changes:</b>\n24h: {inr_24h}%\n7d: {inr_7d}%\n30d: {inr_30d}%</blockquote>"
+            f"<blockquote><b><u>USD Changes</u>:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%</blockquote>"
+            f"<blockquote expandable><b><u>INR Changes</u>:</b>\n24h: {inr_24h}%\n7d: {inr_7d}%\n30d: {inr_30d}%</blockquote>"
             f"<blockquote>ʙʏ : @hehe_stalker</blockquote>"
         )
 
