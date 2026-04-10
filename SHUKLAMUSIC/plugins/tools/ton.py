@@ -95,7 +95,7 @@ async def ton_price_command(client, message: Message):
 
         # Draw Bottom Dates (last 8 days) - adjusted positions
         today = datetime.now()
-        start_x, spacing_x, y_coord = 125, 175, 845
+        start_x, spacing_x, y_coord = 125, 175, 860
 
         for i in range(8):
             date_calc = today - timedelta(days=(7-i))
