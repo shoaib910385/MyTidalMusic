@@ -124,4 +124,4 @@ async def ton_price_command(client, message: Message):
 
     except Exception:
         error_traceback = traceback.format_exc()
-        await msg.edit_text(f"❌ **Critical Error:**\n\n<pre>{error_traceback}</pre>", parse_mode=ParseMode.HTML)
+        await msg.edit_text(f" Error", parse_mode=ParseMode.HTML)
