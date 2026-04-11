@@ -41,7 +41,7 @@ async def bal_command(client, message: Message):
         dns_target = f"{clean_username}.t.me"
         display_name = f"@{clean_username}"
 
-    msg = await message.reply_text(f"⏳ Fetching balance for {display_name}...")
+    msg = await message.reply_text(f"<emoji id=5778421276024509124>⭐</emoji> Fetching balance for {display_name}...")
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -128,11 +128,11 @@ async def bal_command(client, message: Message):
         img_byte_arr.seek(0)
         
         caption = (
-            f"<b>{display_name} 's balance</b>\n"
-            f"<blockquote expandable><b>TON:</b> {ton_str} <emoji id=5778421276024509124>⭐</emoji>\n"
-            f"<b>USD:</b> {usd_str}\n"
-            f"<b>INR:</b> {inr_str}</blockquote>\n"
-            f"<blockquote>• ʙʏ : @hehe_stalker</blockquote>"
+            f"<b>{display_name} 's balance <emoji id=5778421276024509124>⭐</emoji></b>\n"
+            f"<blockquote expandable><b>TON:</b> {ton_str} <emoji id=6030549140633555631>⭐</emoji>\n"
+            f"<b>USD:</b> {usd_str} <emoji id=6028584717081645421>⭐</emoji>\n"
+            f"<b>INR:</b> {inr_str} <emoji id=5042334757040423886>⭐</emoji></blockquote>\n"
+            f"<blockquote><emoji id=6296218646284863141>⭐</emoji> ʙʏ : @hehe_stalker</blockquote>"
         )
 
         await message.reply_photo(photo=img_byte_arr, has_spoiler=True, caption=caption, parse_mode=ParseMode.HTML)
