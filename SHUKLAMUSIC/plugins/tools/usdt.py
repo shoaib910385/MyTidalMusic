@@ -16,7 +16,7 @@ FONT_PATH = os.path.join(current_dir, "Poppins-Bold.ttf")
 
 @app.on_message(filters.command("usdt"))
 async def usdt_price_command(client, message: Message):
-    msg = await message.reply_text("⏳ Fetching latest USDT prices using drxAPI")
+    msg = await message.reply_text("<emoji id=6296218646284863141>⭐</emoji> Fetching latest USDT prices using drxAPI")
 
     try:
         # Fetching data from CoinGecko
@@ -91,10 +91,10 @@ async def usdt_price_command(client, message: Message):
         
         # Caption formatting
         text = (
-            f'<b><u>Tether USDT PRICES</u></b>\n'
-            f'<blockquote>1 USDT = ₹{inr_price}\n'
-            f'Daily change - {daily_text}</blockquote>\n'
-            f'<blockquote>ʙʏ : @thedrxnet</blockquote>'
+            f'<b><u>Tether USDT PRICES</u> <emoji id=6028584717081645421>⭐</emoji></b>\n'
+            f'<blockquote><emoji id=6028584717081645421>⭐</emoji> 1 USDT = ₹{inr_price} <emoji id=6296218646284863141>⭐</emoji>\n'
+            f'<emoji id=6296218646284863141>⭐</emoji> Daily change - {daily_text}</blockquote>\n'
+            f'<blockquote>ʙʏ : @thedrxnet <emoji id=6296218646284863141>⭐</emoji></blockquote>'
         )
 
         await message.reply_photo(photo=img_byte_arr, caption=text, parse_mode=ParseMode.HTML)
