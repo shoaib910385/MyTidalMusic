@@ -29,7 +29,7 @@ async def ton_price_command(client, message: Message):
         # Helper function to clean strings like '+3.05%' into floats
         def clean_float(value):
             if isinstance(value, str):
-                return float(value.replace('%', '').replace('+', '').strip())
+                return float(value.replace('%', '').replace('+', '').replace('−', '-') .strip())
             return float(value)
 
         # Parse and convert
