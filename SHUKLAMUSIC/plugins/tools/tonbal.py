@@ -16,7 +16,7 @@ FONT_PATH = os.path.join(current_dir, "Poppins-Bold.ttf")
 @app.on_message(filters.command("balance"))
 async def bal_command(client, message: Message):
     if len(message.command) < 2:
-        return await message.reply_text("❌ Please provide a username or TON address.\nExample: `/balance @subdict`")
+        return await message.reply_text("❌ Please provide NFT username or TON address.\nExample: `/balance @subdict`")
 
     # --- INPUT PARSING LOGIC ---
     raw_input = message.command[1].lower()
@@ -28,29 +28,52 @@ async def bal_command(client, message: Message):
     target = target.strip("/")
 
     # Determine display name and API target
-    if len(target) > 20 and not target.endswith(".t.me"):
+    if len(target) > 20 and not target.endswith(".t.me") and not target.endswith(".ton"):
         # It's likely a raw TON wallet address
+        is_username = False
         api_target = target
         display_name = f"{target[:6]}...{target[-4:]}"
     else:
         # It's a username/domain
-        # Ensure we don't double up on .t.me if user provided username.t.me
-        clean_username = target.replace(".t.me", "")
-        api_target = f"{clean_username}.t.me"
+        is_username = True
+        # Ensure we just have the base username and force it to check .t.me
+        clean_username = target.replace(".t.me", "").replace(".ton", "")
+        dns_target = f"{clean_username}.t.me"
         display_name = f"@{clean_username}"
 
     msg = await message.reply_text(f"⏳ Fetching balance for {display_name}...")
 
     try:
         async with aiohttp.ClientSession() as session:
-            # Fetch Account Info
+            
+            # --- NEW DNS RESOLUTION LOGIC ---
+            if is_username:
+                async with session.get(f"https://tonapi.io/v2/dns/{dns_target}") as resp_dns:
+                    dns_data = await resp_dns.json()
+                
+                if "error" in dns_data:
+                    err_msg = dns_data.get("error", "")
+                    return await msg.edit_text(f"error")
+                
+                # Extract the owner address from the DNS response
+                try:
+                    if "item" in dns_data and "owner" in dns_data["item"]:
+                        api_target = dns_data["item"]["owner"]["address"]
+                    elif "wallet" in dns_data and "address" in dns_data["wallet"]:
+                        api_target = dns_data["wallet"]["address"]
+                    else:
+                        return await msg.edit_text("❌ **Error:** No wallet address linked to this Telegram username.")
+                except KeyError:
+                    return await msg.edit_text("❌ **Error:** Could not parse owner address from DNS data.")
+
+            # --- FETCH ACCOUNT INFO USING THE RAW WALLET ADDRESS ---
             async with session.get(f"https://tonapi.io/v2/accounts/{api_target}") as resp_acc:
                 acc_data = await resp_acc.json()
                 
             if "error" in acc_data:
                 err_msg = acc_data.get("error", "")
                 if "not resolved" in err_msg or "entity not found" in err_msg:
-                    return await msg.edit_text("❌ No account found. Ensure the username has a TON DNS or use a wallet address.")
+                    return await msg.edit_text("❌ No account found for this address.")
                 else:
                     return await msg.edit_text(f"❌ **API Error:** {err_msg}")
 
@@ -116,4 +139,4 @@ async def bal_command(client, message: Message):
         await msg.delete()
 
     except Exception:
-        await msg.edit_text(f"❌ **Critical Error:**\n\n<pre>{traceback.format_exc()}</pre>", parse_mode=ParseMode.HTML)
+        await msg.edit_text(f"❌ Critical Error\n DM @subdict", parse_mode=ParseMode.HTML)
