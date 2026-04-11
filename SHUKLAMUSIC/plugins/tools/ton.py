@@ -17,7 +17,7 @@ FONT_PATH = os.path.join(current_dir, "Poppins-Bold.ttf")
 
 @app.on_message(filters.command("ton"))
 async def ton_price_command(client, message: Message):
-    msg = await message.reply_text("⏳ Fetching latest TON prices using drxAPI")
+    msg = await message.reply_text("<emoji id=6296218646284863141>⭐</emoji> Fetching latest TON prices using drxAPI")
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -111,11 +111,11 @@ async def ton_price_command(client, message: Message):
         img_byte_arr.name = "ton_stats.png"
         
         text = (
-            f'<b><u>TON PRICES</u>:</b>\n'
-            f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ${usd_price}\n'
-            f'<tg-emoji emoji-id="5778421276024509124">💰</tg-emoji>1 TON = ₹{inr_price}\n\n'
-            f'<blockquote expandable><b><u>USD Changes</u>:<tg-emoji emoji-id="5345889288741461772">💰</tg-emoji></b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
-            f'<b><u>INR Changes</u>:</b>\n24h: {inr_24h}\n7d: {inr_7d}\n30d: {inr_30d}</blockquote>\n'
+            f'<b><emoji id=6030549140633555631>⭐</emoji>  <u>TON PRICES</u>:</b>\n'
+            f'<emoji id=6030549140633555631>💰</emoji>1 TON = ${usd_price} <emoji id=6028584717081645421>⭐</emoji>\n'
+            f'<emoji id=6030549140633555631>⭐</emoji>1 TON = ₹{inr_price} <emoji id=6296218646284863141>⭐</emoji>\n\n'
+            f'<blockquote expandable><b><emoji id=6028584717081645421>⭐</emoji> <u>USD Changes</u>:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
+            f'<b><emoji id=6296218646284863141>⭐</emoji> <u>INR Changes</u>:</b>\n24h: {inr_24h}\n7d: {inr_7d}\n30d: {inr_30d}</blockquote>\n'
             f'<blockquote>ʙʏ : @hehe_stalker</blockquote>'
         )
 
