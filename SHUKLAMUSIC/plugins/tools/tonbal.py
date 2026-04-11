@@ -13,10 +13,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.path.join(current_dir, "balance_base.png")
 FONT_PATH = os.path.join(current_dir, "Poppins-Bold.ttf")
 
-@app.on_message(filters.command("bal"))
+@app.on_message(filters.command("balance"))
 async def bal_command(client, message: Message):
     if len(message.command) < 2:
-        return await message.reply_text("❌ Please provide a username or TON address.\nExample: `/bal @subdict`")
+        return await message.reply_text("❌ Please provide a username or TON address.\nExample: `/balance @subdict`")
 
     # --- INPUT PARSING LOGIC ---
     raw_input = message.command[1].lower()
