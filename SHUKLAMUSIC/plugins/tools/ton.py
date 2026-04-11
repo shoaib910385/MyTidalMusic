@@ -112,8 +112,8 @@ async def ton_price_command(client, message: Message):
         
         text = (
             f'<b><emoji id=6030549140633555631>⭐</emoji>  <u>TON PRICES</u>:</b>\n'
-            f'<emoji id=6030549140633555631>💰</emoji>1 TON = ${usd_price} <emoji id=6028584717081645421>⭐</emoji>\n'
-            f'<emoji id=6030549140633555631>⭐</emoji>1 TON = ₹{inr_price} <emoji id=6296218646284863141>⭐</emoji>\n\n'
+            f'1 TON = ${usd_price} <emoji id=6028584717081645421>⭐</emoji>\n'
+            f'1 TON = ₹{inr_price} <emoji id=6296218646284863141>⭐</emoji>\n'
             f'<blockquote expandable><b><emoji id=6028584717081645421>⭐</emoji> <u>USD Changes</u>:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
             f'<b><emoji id=6296218646284863141>⭐</emoji> <u>INR Changes</u>:</b>\n24h: {inr_24h}\n7d: {inr_7d}\n30d: {inr_30d}</blockquote>\n'
             f'<blockquote><emoji id=6296218646284863141>⭐</emoji> ʙʏ : @hehe_stalker</blockquote>'
