@@ -47,8 +47,8 @@ async def usdt_price_command(client, message: Message):
             return
 
         try:
-            font_price = ImageFont.truetype(FONT_PATH, 86)
-            font_change = ImageFont.truetype(FONT_PATH, 60)
+            font_price = ImageFont.truetype(FONT_PATH, 92)
+            font_change = ImageFont.truetype(FONT_PATH, 80)
             font_dates = ImageFont.truetype(FONT_PATH, 28)
         except Exception as e:
             await msg.edit_text(f"❌ **Error loading font:** {str(e)}")
@@ -71,7 +71,7 @@ async def usdt_price_command(client, message: Message):
 
         # Draw Daily Change in light pink - dynamically centered horizontally in the image for the middle pill
         center_x = img.width / 2
-        draw.text((center_x, 475), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
+        draw.text((center_x, 500), daily_text, font=font_change, fill=LIGHT_PINK, anchor="mm")
 
         # Draw Bottom Dates (last 8 days) - exact same configuration as ton.py
         today = datetime.now()
