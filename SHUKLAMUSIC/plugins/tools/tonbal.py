@@ -129,7 +129,7 @@ async def bal_command(client, message: Message):
         
         caption = (
             f"<b>{display_name} 's balance</b>\n"
-            f"<blockquote expandable><b>TON:</b> {ton_str}\n"
+            f"<blockquote expandable><b>TON:</b> {ton_str} <emoji id=5778421276024509124>⭐</emoji>\n"
             f"<b>USD:</b> {usd_str}\n"
             f"<b>INR:</b> {inr_str}</blockquote>\n"
             f"<blockquote>• ʙʏ : @hehe_stalker</blockquote>"
