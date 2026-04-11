@@ -116,7 +116,7 @@ async def ton_price_command(client, message: Message):
             f'<emoji id=6030549140633555631>⭐</emoji>1 TON = ₹{inr_price} <emoji id=6296218646284863141>⭐</emoji>\n\n'
             f'<blockquote expandable><b><emoji id=6028584717081645421>⭐</emoji> <u>USD Changes</u>:</b>\n24h: {usd_24h}%\n7d: {usd_7d}%\n30d: {usd_30d}%\n\n'
             f'<b><emoji id=6296218646284863141>⭐</emoji> <u>INR Changes</u>:</b>\n24h: {inr_24h}\n7d: {inr_7d}\n30d: {inr_30d}</blockquote>\n'
-            f'<blockquote>ʙʏ : @hehe_stalker</blockquote>'
+            f'<blockquote><emoji id=6296218646284863141>⭐</emoji> ʙʏ : @hehe_stalker</blockquote>'
         )
 
         await message.reply_photo(photo=img_byte_arr, has_spoiler=True, caption=text, parse_mode=ParseMode.HTML)
