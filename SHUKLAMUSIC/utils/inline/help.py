@@ -1,7 +1,7 @@
 from typing import Union
 
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
+from pyrogram.enums import ButtonStyle
 from SHUKLAMUSIC import app
 
 
@@ -19,6 +19,7 @@ def help_pannel(_, START: Union[bool, int] = None):
         InlineKeyboardButton(
             text=_["NEXT_PAGE"],
             callback_data=f"mbot_cb",
+            style=ButtonStyle.PRIMARY,
         ),
     ]
     mark = second if START else first
@@ -107,6 +108,8 @@ def help_back_markup(_):
                 InlineKeyboardButton(
                     text=_["BACK_BUTTON"],
                     callback_data=f"settings_back_helper",
+                    style=ButtonStyle.DANGER, 
+                    icon_custom_emoji_id=5408832111773757273,
                 ),
             ]
         ]
@@ -120,6 +123,7 @@ def private_help_panel(_):
             InlineKeyboardButton(
                 text=_["S_B_4"],
                 url=f"https://t.me/{app.username}?start=help",
+                style=ButtonStyle.PRIMARY,
             ),
         ],
     ]
