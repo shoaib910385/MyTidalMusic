@@ -2,7 +2,7 @@ from typing import Union
 from SHUKLAMUSIC import app
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
+from pyrogram.enums import ButtonStyle
 
 def queue_markup(
     _,
@@ -21,6 +21,8 @@ def queue_markup(
             InlineKeyboardButton(
                 text=_["CLOSE_BUTTON"],
                 callback_data="close",
+                style=ButtonStyle.DANGER, 
+                icon_custom_emoji_id=5408832111773757273,
             ),
         ]
     ]
@@ -39,6 +41,8 @@ def queue_markup(
             InlineKeyboardButton(
                 text=_["CLOSE_BUTTON"],
                 callback_data="close",
+                style=ButtonStyle.DANGER, 
+                icon_custom_emoji_id=5408832111773757273,
             ),
         ],
     ]
@@ -57,6 +61,8 @@ def queue_back_markup(_, CPLAY):
                 InlineKeyboardButton(
                     text=_["CLOSE_BUTTON"],
                     callback_data="close",
+                    style=ButtonStyle.DANGER, 
+                    icon_custom_emoji_id=5408832111773757273,
                 ),
             ]
         ]
@@ -67,11 +73,10 @@ def queue_back_markup(_, CPLAY):
 def aq_markup(_, chat_id):
     buttons = [
         [
-            InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
-            InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
-            InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
-            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Resume|{chat_id}", icon_custom_emoji_id=5409222721869459068),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Pause|{chat_id}", icon_custom_emoji_id=5409042015415448331),
+            InlineKeyboardButton(text="", callback_data=f"ADMIN Stop|{chat_id}", icon_custom_emoji_id=5408832111773757273),
         ],
-        [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
+        [InlineKeyboardButton(text=" ᴄʟᴏsᴇ ▣", callback_data="close", style=ButtonStyle.DANGER, icon_custom_emoji_id=5408832111773757273)],
     ]
     return buttons
